@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UFHE — Urban Flooding & Hydrology Engine | Mumbai</title>
+  <meta name="description"
+    content="Smart flood management dashboard for Mumbai - predict, prepare, and respond to urban flooding with data-driven intelligence.">
+  <link rel="stylesheet" href="src/css/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* Leaflet tooltip override for dark theme */
+    .leaflet-tooltip {
+      background: #1a2236 !important;
+      color: #f0f4fc !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 12px !important;
+      padding: 6px 10px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .leaflet-tooltip::before {
+      border-top-color: #1a2236 !important;
+    }
+
+    .leaflet-popup-content-wrapper {
+      background: #1a2236 !important;
+      color: #f0f4fc !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-radius: 10px !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .leaflet-popup-tip {
+      background: #1a2236 !important;
+    }
+
+    .leaflet-popup-close-button {
+      color: #8b97b0 !important;
+    }
+
+    .leaflet-control-layers {
+      background: #1a2236 !important;
+      color: #f0f4fc !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-radius: 8px !important;
+    }
+
+    .leaflet-control-layers-toggle {
+      width: 30px !important;
+      height: 30px !important;
+    }
+
+    .leaflet-control-zoom a {
+      background: #1a2236 !important;
+      color: #f0f4fc !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Rain animation overlay -->
+  <div class="rain-overlay" id="rain-overlay"></div>
+
+  <!-- Mobile sidebar backdrop -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <div class="app-shell">
+    <!-- ═══ Sidebar ═══ -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div>
+          <div class="sidebar-brand-text" id="sidebar-city-label">🌊 User Panel</div>
+          <div class="sidebar-brand-sub" id="sidebar-city-sub">Mumbai Flood Engine</div>
+        </div>
+      </div>
+      <!-- City Selector -->
+      <div class="city-selector">
+        <button class="city-btn active" id="city-btn-mumbai" onclick="window.switchCity('mumbai')">🌊 Mumbai</button>
+        <button class="city-btn" id="city-btn-delhi" onclick="window.switchCity('delhi')">🏙️ Delhi</button>
+      </div>
+      <div class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <div class="nav-item active" data-page="dashboard">
+          <span class="nav-item-icon">📊</span>
+          <span>Dashboard</span>
+        </div>
+        <div class="nav-item" data-page="map">
+          <span class="nav-item-icon">🗺️</span>
+          <span>Map Explorer</span>
+        </div>
+        <div class="nav-item" data-page="hotspots">
+          <span class="nav-item-icon">🎯</span>
+          <span>Flood Hotspots</span>
+          <span class="nav-badge">25</span>
+        </div>
+        <div class="nav-item" data-page="readiness">
+          <span class="nav-item-icon">🛡️</span>
+          <span>Readiness (PMRS)</span>
+        </div>
+        <div class="nav-item" data-page="drainage">
+          <span class="nav-item-icon">🔧</span>
+          <span>Drainage & Pipelines</span>
+        </div>
+
+        <div class="nav-section-label">Operations</div>
+        <div class="nav-item" data-page="rainfall">
+          <span class="nav-item-icon">🌧️</span>
+          <span>Rainfall</span>
+        </div>
+        <div class="nav-item" data-page="alerts">
+          <span class="nav-item-icon">🚨</span>
+          <span>Alerts</span>
+          <span class="nav-badge">3</span>
+        </div>
+        <div class="nav-item" data-page="nfvas">
+          <span class="nav-item-icon">🌐</span>
+          <span>Bhuvan NFVAS</span>
+        </div>
+        <div class="nav-item" data-page="scenario">
+          <span class="nav-item-icon">🔮</span>
+          <span>Scenario Simulator</span>
+        </div>
+        <div class="nav-item" data-page="citizen">
+          <span class="nav-item-icon">📱</span>
+          <span>Citizen Reporting</span>
+          <span class="nav-badge" style="background:var(--accent-blue)">New</span>
+        </div>
+
+        <div class="nav-section-label">System</div>
+        <div class="nav-item" data-page="analytics">
+          <span class="nav-item-icon">📈</span>
+          <span>Analytics</span>
+        </div>
+        <div class="nav-item" data-page="admin">
+          <span class="nav-item-icon">⚙️</span>
+          <span>Administration</span>
+        </div>
+      </div>
+      <!-- Sidebar footer -->
+      <div
+        style="padding:var(--space-md) var(--space-lg);border-top:1px solid var(--border-subtle);font-size:11px;color:var(--text-muted)">
+        <div style="display:flex;align-items:center;gap:var(--space-sm)">
+          <div
+            style="width:28px;height:28px;border-radius:50%;background:var(--accent-blue-dim);display:flex;align-items:center;justify-content:center;font-size:16px;">
+            👤
+          </div>
+          <div>
+            <div style="color:var(--text-secondary);font-weight:500">Commissioner</div>
+            <div>MCGM Mumbai</div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ═══ Main Content ═══ -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobile-menu-toggle" title="Open Menu" aria-label="Open navigation menu">
+            ☰
+          </button>
+          <div>
+            <div class="topbar-title" id="topbar-title">Dashboard</div>
+            <div class="topbar-subtitle" id="topbar-subtitle">City-wide flood intelligence overview</div>
+          </div>
+        </div>
+        <div class="topbar-center"
+          style="position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px;">
+          <span style="font-size:36px;">🌊</span>
+          <span
+            style="font-family: var(--font-sans); font-weight: 800; font-size: 28px; color: #38bdf8; letter-spacing:-0.5px;">JalPravah</span>
+        </div>
+        <div class="topbar-right">
+          <div class="live-indicator">
+            <span class="live-dot"></span>
+            LIVE
+          </div>
+          <div class="topbar-time" id="topbar-time">Loading...</div>
+          <button class="topbar-btn" title="Simulate Mobile View" onclick="openMobilePreview()">📱</button>
+          <button class="topbar-btn" title="Notifications">🔔</button>
+          <button class="topbar-btn" title="Settings">⚙️</button>
+        </div>
+      </header>
+
+      <!-- ═══════════════════════════════════════
+           PAGE: DASHBOARD
+           ═══════════════════════════════════════ -->
+      <div class="page page-content" id="page-dashboard">
+        <!-- Dashboard Hero -->
+        <div class="alert-banner">
+          <span class="status-alive" style="background:var(--accent-red)"></span>
+          <span><strong>Mumbai Monsoon Watch:</strong> BMC has deployed 408 pumps across the city. Mithi River at 2.8m
+            (warning level: 3.5m)</span>
+          <span class="data-source-badge" style="margin-left:auto"><span class="source-dot"></span> LIVE via MCGM</span>
+        </div>
+        <!-- Metric Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card red">
+            <div class="metric-card-header">
+              <span class="metric-card-label">Flood Hotspots</span>
+              <span class="metric-card-icon">🎯</span>
+            </div>
+            <div class="metric-card-value" id="metric-hotspots">—</div>
+            <div class="metric-card-sub" id="metric-hotspots-sub">Loading...</div>
+          </div>
+          <div class="metric-card blue">
+            <div class="metric-card-header">
+              <span class="metric-card-label">Avg PMRS Score</span>
+              <span class="metric-card-icon">📊</span>
+            </div>
+            <div class="metric-card-value" id="metric-pmrs">—</div>
+            <div class="metric-card-sub" id="metric-pmrs-sub">Loading...</div>
+          </div>
+          <div class="metric-card green">
+            <div class="metric-card-header">
+              <span class="metric-card-label">Current Rainfall</span>
+              <span class="metric-card-icon">🌧️</span>
+            </div>
+            <div class="metric-card-value" id="metric-rainfall">—</div>
+            <div class="metric-card-sub" id="metric-rainfall-sub">Fetching from Open-Meteo...</div>
+          </div>
+          <div class="metric-card yellow">
+            <div class="metric-card-header">
+              <span class="metric-card-label">Active Alerts</span>
+              <span class="metric-card-icon">🚨</span>
+            </div>
+            <div class="metric-card-value" id="metric-alerts">—</div>
+            <div class="metric-card-sub" id="metric-alerts-sub">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Map + Rankings -->
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">🗺️ Mumbai Flood Risk Map</span>
+              <button class="btn btn-ghost btn-sm" onclick="navigateTo('map')">Open Full Map →</button>
+            </div>
+            <div class="card-body-compact" style="height:360px;padding:0">
+              <div id="dashMap" style="width:100%;height:100%;border-radius:0 0 var(--radius-md) var(--radius-md)">
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">📋 Ward Readiness Ranking</span>
+              <button class="btn btn-ghost btn-sm" onclick="navigateTo('readiness')">View All →</button>
+            </div>
+            <div class="card-body-compact" style="max-height:360px;overflow-y:auto">
+              <table class="ranking-table">
+                <thead>
+                  <tr>
+                    <th style="width:36px">#</th>
+                    <th>Ward</th>
+                    <th>PMRS Score</th>
+                    <th style="width:40px">Grade</th>
+                  </tr>
+                </thead>
+                <tbody id="ward-rankings-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts + Actions -->
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">🚨 Recent Alerts</span>
+              <button class="btn btn-ghost btn-sm" onclick="navigateTo('alerts')">View All →</button>
+            </div>
+            <div class="card-body" id="alerts-feed"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">📝 Priority Actions</span>
+            </div>
+            <div class="card-body-compact" style="max-height:300px;overflow-y:auto">
+              <div class="action-cards-grid" id="action-items-list">
+                <!-- Action Cards go here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard data sources footer -->
+        <div
+          style="display:flex;align-items:center;gap:var(--space-md);padding:var(--space-sm) 0;margin-top:var(--space-sm)">
+          <span class="data-source-badge"><span class="source-dot"></span> Weather: Open-Meteo API</span>
+          <span class="data-source-badge"><span class="source-dot"></span> Maps: OpenStreetMap</span>
+          <span class="data-source-badge"><span class="source-dot"></span> Bhuvan ISRO APIs</span>
+          <span class="data-source-badge"><span class="source-dot"></span> Infrastructure: MCGM / PWD</span>
+          <span style="font-size:10px;color:var(--text-muted);margin-left:auto">Last synced: 2 min ago</span>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════
+           PAGE: MAP EXPLORER
+           ═══════════════════════════════════════ -->
+      <div class="page page-hidden" id="page-map"
+        style="padding:var(--space-md);flex:1;display:flex;flex-direction:column">
+        <div class="map-container-full" style="flex:1">
+          <!-- Layer Panel -->
+          <div class="map-sidebar-panel">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Layers</span>
+              </div>
+              <div class="card-body-compact">
+                <!-- Bhuvan Info Panel (Hidden by default) -->
+                <div id="bhuvan-result-panel" class="card" style="display:none; position:absolute; bottom:20px; right:20px; z-index:1000; width:380px; box-shadow:var(--shadow-xl); background:rgba(10,22,40,0.95); backdrop-filter:blur(12px); border:1px solid rgba(56,189,248,0.3)">
+                </div>
+
+                <div class="layer-toggle">
+                  <label class="layer-toggle-label"><span class="dot" style="background:var(--accent-red)"></span>
+                    Hotspots</label>
+                  <label class="toggle-switch"><input type="checkbox" id="layer-hotspots" checked><span
+                      class="toggle-slider"></span></label>
+                </div>
+                <!-- Bhuvan FVI Map Toggle -->
+                <div class="layer-toggle" id="toggle-fvi-container">
+                  <label class="layer-toggle-label"><span class="dot" style="background:#f59e0b"></span> Bhuvan FVI Map</label>
+                  <label class="toggle-switch"><input type="checkbox" id="layer-fvi"><span class="toggle-slider"></span></label>
+                </div>
+                <!-- Bhuvan Rainfall Map Toggle -->
+                <div class="layer-toggle" id="toggle-rainfall-container">
+                  <label class="layer-toggle-label"><span class="dot" style="background:#0ea5e9"></span> Bhuvan Rainfall</label>
+                  <label class="toggle-switch"><input type="checkbox" id="layer-rainfall"><span class="toggle-slider"></span></label>
+                </div>
+                <!-- Micro Basin Toggle -->
+                <div class="layer-toggle">
+                  <label class="layer-toggle-label"><span class="dot" style="background:var(--accent-blue)"></span>
+                    Micro-Basins</label>
+                  <label class="toggle-switch"><input type="checkbox" id="layer-microbasins"><span
+                      class="toggle-slider"></span></label>
+                </div>
+                <div class="layer-toggle">
+                  <label class="layer-toggle-label"><span class="dot" style="background:var(--accent-blue)"></span> Ward Boundaries</label>
+                  <label class="toggle-switch"><input type="checkbox" id="layer-wards"><span
+                      class="toggle-slider"></span></label>
+                </div>
+                <div class="layer-toggle">
+                  <label class="layer-toggle-label" title="Live OSM Drainage Vectors"><span class="dot" style="background:var(--accent-green)"></span>
+                    OSM Drainage</label>
+                  <label class="toggle-switch"><input type="checkbox" id="layer-drainage"><span
+                      class="toggle-slider"></span></label>
+                </div>
+                <div class="layer-toggle">
+                  <label class="layer-toggle-label"><span class="dot" style="background:var(--accent-purple)"></span>
+                    DEM Terrain</label>
+                  <label class="toggle-switch"><input type="checkbox" id="layer-dem"><span
+                      class="toggle-slider"></span></label>
+                </div>
+                <!-- 3D Terrain Toggle -->
+                <div class="layer-toggle">
+                  <label class="layer-toggle-label">🏔️ 3D Terrain Viewer</label>
+                  <label class="toggle-switch"><input type="checkbox" id="layer-3d"><span
+                      class="toggle-slider"></span></label>
+                </div>
+              </div>
+            </div>
+            <!-- Legend -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Legend</span></div>
+              <div class="card-body-compact" style="font-size:12px">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="dot"
+                    style="background:#ef4444;width:10px;height:10px;border-radius:50%;display:inline-block"></span>
+                  Very High (FVI > 0.8)</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="dot"
+                    style="background:#f97316;width:10px;height:10px;border-radius:50%;display:inline-block"></span>
+                  High (0.6–0.8)</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="dot"
+                    style="background:#eab308;width:10px;height:10px;border-radius:50%;display:inline-block"></span>
+                  Moderate (0.4–0.6)</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span class="dot"
+                    style="background:#22c55e;width:10px;height:10px;border-radius:50%;display:inline-block"></span> Low
+                  (0.2–0.4)</div>
+                <div style="display:flex;align-items:center;gap:6px"><span class="dot"
+                    style="background:#94a3b8;width:10px;height:10px;border-radius:50%;display:inline-block"></span>
+                  Very Low (< 0.2)</div>
+                </div>
+              </div>
+            </div>
+            <!-- Map -->
+            <div class="map-main" style="position:relative;">
+              <div id="explorerMap" style="width:100%;height:100%"></div>
+              <canvas id="deck-canvas"
+                style="position:absolute; top:0; left:0; width:100%; height:100%; z-index: 1000; pointer-events:none;"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+           PAGE: BHUVAN NFVAS
+           ═══════════════════════════════════════ -->
+        <div class="page page-hidden" id="page-nfvas" style="height: calc(100vh - 64px); display: flex; flex-direction: column; padding: var(--space-md); gap: var(--space-md);">
+          <div class="card" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
+            <iframe src="https://bhuvan-app1.nrsc.gov.in/nfvas/#" loading="lazy" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+           PAGE: HOTSPOTS
+           ═══════════════════════════════════════ -->
+        <div class="page page-content page-hidden" id="page-hotspots">
+          <!-- Stats -->
+          <div class="metrics-grid" style="grid-template-columns:repeat(5,1fr)">
+            <div class="metric-card red">
+              <div class="metric-card-label">Total Hotspots</div>
+              <div class="metric-card-value" id="hs-total">—</div>
+            </div>
+            <div class="metric-card" style="border-top:2px solid #ef4444">
+              <div class="metric-card-label">🔴 Very High</div>
+              <div class="metric-card-value" id="hs-very-high">—</div>
+            </div>
+            <div class="metric-card" style="border-top:2px solid #f97316">
+              <div class="metric-card-label">🟠 High</div>
+              <div class="metric-card-value" id="hs-high">—</div>
+            </div>
+            <div class="metric-card" style="border-top:2px solid #eab308">
+              <div class="metric-card-label">🟡 Moderate</div>
+              <div class="metric-card-value" id="hs-moderate">—</div>
+            </div>
+            <div class="metric-card" style="border-top:2px solid #22c55e">
+              <div class="metric-card-label">🟢 Low</div>
+              <div class="metric-card-value" id="hs-low">—</div>
+            </div>
+          </div>
+          <!-- Table -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title" id="hotspots-page-title">🎯 All Flood Hotspots — Mumbai</span>
+              <div style="display:flex;gap:var(--space-sm)">
+                <button class="btn btn-ghost btn-sm">📥 Export CSV</button>
+                <button class="btn btn-ghost btn-sm">📥 GeoJSON</button>
+              </div>
+            </div>
+            <div style="overflow-x:auto;max-height:calc(100vh - 280px);overflow-y:auto">
+              <table class="hotspot-table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Location</th>
+                    <th>Code</th>
+                    <th>Ward</th>
+                    <th>FVI</th>
+                    <th>Severity</th>
+                    <th>Depth</th>
+                    <th>Deficit</th>
+                    <th>Pop Exposed</th>
+                    <th>Flood History</th>
+                  </tr>
+                </thead>
+                <tbody id="hotspots-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+           PAGE: READINESS (PMRS)
+           ═══════════════════════════════════════ -->
+        <div class="page page-content page-hidden" id="page-readiness">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-md)">
+            <div>
+              <h2 style="font-size:18px;font-weight:600;margin-bottom:4px">Pre-Monsoon Readiness Scores</h2>
+              <p style="font-size:13px;color:var(--text-muted)">Ward-level infrastructure, vulnerability, response, and
+                historical performance assessment</p>
+            </div>
+            <button class="btn btn-primary">📄 Generate City Report</button>
+          </div>
+          <div id="pmrs-ward-cards" style="max-height:calc(100vh - 180px);overflow-y:auto"></div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+           PAGE: RAINFALL
+           ═══════════════════════════════════════ -->
+        <div class="page page-content page-hidden" id="page-rainfall">
+          <!-- Current Conditions -->
+          <div class="card" style="margin-bottom:var(--space-md)">
+            <div class="card-header">
+              <span class="card-title">🌡️ Current Conditions — Mumbai (Live from Open-Meteo)</span>
+              <div class="live-indicator"><span class="live-dot"></span> LIVE</div>
+            </div>
+            <div class="card-body">
+              <div class="weather-widget">
+                <div class="weather-param">
+                  <div class="weather-param-value" id="rain-condition">—</div>
+                  <div class="weather-param-label">Condition</div>
+                </div>
+                <div class="weather-param">
+                  <div class="weather-param-value" id="rain-temp">—</div>
+                  <div class="weather-param-label">Temperature</div>
+                </div>
+                <div class="weather-param">
+                  <div class="weather-param-value" style="color:var(--accent-blue)" id="rain-precip">—</div>
+                  <div class="weather-param-label">Precipitation</div>
+                </div>
+                <div class="weather-param">
+                  <div class="weather-param-value" id="rain-humidity">—</div>
+                  <div class="weather-param-label">Humidity</div>
+                </div>
+                <div class="weather-param">
+                  <div class="weather-param-value" id="rain-wind">—</div>
+                  <div class="weather-param-label">Wind Speed</div>
+                </div>
+                <div class="weather-param">
+                  <div class="weather-param-value" id="rain-pressure">—</div>
+                  <div class="weather-param-label">Pressure</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7-Day Forecast -->
+          <div class="card" style="margin-bottom:var(--space-md)">
+            <div class="card-header">
+              <span class="card-title">📅 7-Day Forecast</span>
+            </div>
+            <div class="card-body">
+              <div id="forecast-list" style="display:grid;grid-template-columns:repeat(7,1fr);gap:var(--space-sm)">
+                <div class="empty-state" style="grid-column:1/-1;padding:var(--space-lg)">Loading forecast...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hourly Precipitation Chart -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">📊 48-Hour Precipitation Forecast</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="height:280px">
+                <canvas id="hourlyChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── Historical Rainfall (Past 10 Months) ─────── -->
+          <div class="card" style="margin-top:var(--space-md)">
+            <div class="card-header">
+              <span class="card-title">📅 Historical Rainfall — Past 10 Months</span>
+              <div style="display:flex;gap:var(--space-sm);align-items:center">
+                <span class="data-source-badge"><span class="source-dot"></span> Open-Meteo Archive API</span>
+                <button class="btn btn-ghost btn-sm" id="btn-load-historical"
+                  onclick="window.loadHistoricalData && window.loadHistoricalData()">🔄 Load Data</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <!-- Loading state -->
+              <div id="historical-loading" style="display:none;text-align:center;padding:var(--space-xl)">
+                <div style="font-size:32px;animation:breathe 1.5s ease-in-out infinite">🌧️</div>
+                <div style="margin-top:var(--space-sm);color:var(--text-muted);font-size:13px">Fetching 10 months of
+                  rainfall data from Open-Meteo archive...</div>
+              </div>
+
+              <!-- Monthly Summary Cards -->
+              <div id="historical-monthly-grid" class="metrics-grid"
+                style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:var(--space-md);display:none">
+                <!-- Filled by JS -->
+              </div>
+
+              <!-- Chart -->
+              <div id="historical-chart-container" style="display:none;margin-bottom:var(--space-md)">
+                <div style="font-weight:600;font-size:14px;margin-bottom:var(--space-sm)">📊 Monthly Rainfall Comparison
+                  (mm)</div>
+                <div class="chart-container" style="height:260px">
+                  <canvas id="historicalBarChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Monthly detail table -->
+              <div id="historical-table-container" style="display:none">
+                <div
+                  style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-sm)">
+                  <div style="font-weight:600;font-size:14px">📋 Monthly Breakdown</div>
+                  <div style="font-size:11px;color:var(--text-muted)">Click any month to see daily data</div>
+                </div>
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Month</th>
+                        <th>Total Rainfall (mm)</th>
+                        <th>Rainy Days</th>
+                        <th>Precip Hours</th>
+                        <th>Max Temp (°C)</th>
+                        <th>Min Temp (°C)</th>
+                        <th>Intensity</th>
+                      </tr>
+                    </thead>
+                    <tbody id="historical-table-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Daily detail view (shown on month click) -->
+              <div id="daily-detail-container" style="display:none;margin-top:var(--space-md)">
+                <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-sm)">
+                  <button class="btn btn-ghost btn-sm"
+                    onclick="document.getElementById('daily-detail-container').style.display='none'">← Back</button>
+                  <span style="font-weight:600;font-size:14px" id="daily-detail-title">Daily Data</span>
+                </div>
+                <div class="table-responsive" style="max-height:400px;overflow-y:auto">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Rainfall (mm)</th>
+                        <th>Level</th>
+                      </tr>
+                    </thead>
+                    <tbody id="daily-detail-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Placeholder if not loaded -->
+              <div id="historical-placeholder" style="text-align:center;padding:var(--space-xl)">
+                <div style="font-size:48px;margin-bottom:var(--space-md)">📊</div>
+                <div style="font-weight:600;margin-bottom:4px">View 10 Months of Rainfall History</div>
+                <div
+                  style="font-size:12px;color:var(--text-muted);margin-bottom:var(--space-md);max-width:400px;margin-left:auto;margin-right:auto">
+                  Real daily precipitation data from Open-Meteo's archive API for Mumbai (19.076°N, 72.878°E). Includes
+                  monthly totals, rainy day counts, and intensity analysis.</div>
+                <button class="btn btn-primary" onclick="window.loadHistoricalData && window.loadHistoricalData()">Load
+                  Historical Data</button>
+              </div>
+            </div>
+          </div>
+        <!-- Delhi Historical Rainfall (shown when Delhi is active) -->
+        <div class="card" style="margin-top:var(--space-md);display:none" id="delhi-rainfall-history-section">
+          <div class="card-header">
+            <span class="card-title">📅 Delhi Monsoon Rainfall History (IMD Data, 2020–2024)</span>
+            <span class="data-source-badge"><span class="source-dot"></span> IMD / IITM Pune</span>
+          </div>
+          <div class="card-body">
+            <div class="metrics-grid" style="grid-template-columns:repeat(5,1fr);gap:var(--space-sm);margin-bottom:var(--space-md)">
+              <div class="metric-card" style="border-top:2px solid #f87171">
+                <div class="metric-card-label">2020 Monsoon</div>
+                <div class="metric-card-value" style="font-size:22px">576.5mm</div>
+                <div class="metric-card-sub" style="color:#f87171">▼ 9% below normal</div>
+              </div>
+              <div class="metric-card" style="border-top:2px solid #34d399">
+                <div class="metric-card-label">2021 Monsoon</div>
+                <div class="metric-card-value" style="font-size:22px">1169.7mm</div>
+                <div class="metric-card-sub" style="color:#34d399">▲ 79% — 3rd highest!</div>
+              </div>
+              <div class="metric-card" style="border-top:2px solid #fb923c">
+                <div class="metric-card-label">2022 Monsoon</div>
+                <div class="metric-card-value" style="font-size:22px">516.9mm</div>
+                <div class="metric-card-sub" style="color:#fb923c">▼ 19% below normal</div>
+              </div>
+              <div class="metric-card" style="border-top:2px solid #38bdf8">
+                <div class="metric-card-label">2023 Monsoon</div>
+                <div class="metric-card-value" style="font-size:22px">654.2mm</div>
+                <div class="metric-card-sub" style="color:#38bdf8">▲ 2% near normal</div>
+              </div>
+              <div class="metric-card" style="border-top:2px solid #a78bfa">
+                <div class="metric-card-label">2024 Monsoon</div>
+                <div class="metric-card-value" style="font-size:22px">1029.9mm</div>
+                <div class="metric-card-sub" style="color:#a78bfa">▲ 61% — 7th highest!</div>
+              </div>
+            </div>
+
+            <!-- Year-by-year detail cards -->
+            <div style="display:grid;gap:var(--space-sm)">
+              <div class="rainfall-history-card">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+                  <div>
+                    <div style="font-weight:700;font-size:15px">🌧️ 2021 — Record Breaking Year</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:3px">Jun–Sep 2021 · 67 rainy days · Peak: 122.8mm in single day</div>
+                  </div>
+                  <span style="background:rgba(52,211,153,0.15);color:#34d399;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap">+79% above normal</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">Yamuna breached warning level in August. Extensive flooding in low-lying areas near Okhla, Yamuna Bank. 3rd highest seasonal rainfall since 1901.</div>
+              </div>
+              <div class="rainfall-history-card">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+                  <div>
+                    <div style="font-weight:700;font-size:15px">💥 2024 — Large Excess Year</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:3px">Jun–Sep 2024 · 58 rainy days · Peak: 99.2mm in single day</div>
+                  </div>
+                  <span style="background:rgba(167,139,250,0.15);color:#a78bfa;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap">+61% — 7th highest since 1901</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">Yamuna reached highest level since 2013. Over 10,000 residents evacuated from low-lying areas. ITO, Minto Bridge severely flooded. Flood Control Centre activated.</div>
+              </div>
+              <div class="rainfall-history-card">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+                  <div>
+                    <div style="font-weight:700;font-size:15px">⚡ 2023 — Intense Short Bursts</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:3px">Jun–Sep 2023 · 48 rainy days · Extreme event: 153mm on July 9</div>
+                  </div>
+                  <span style="background:rgba(56,189,248,0.15);color:#38bdf8;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap">Near normal (±2%)</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">July 9 cloudburst event (153mm/day) caused major flooding. Red Fort, ITO, Kashmiri Gate, Civil Lines submerged. Yamuna at 208.6m — alert level crossed.</div>
+              </div>
+            </div>
+
+            <div style="margin-top:var(--space-md);padding:var(--space-md);background:rgba(56,189,248,0.05);border:1px solid rgba(56,189,248,0.15);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary)">
+              📊 <strong>Normal Baseline:</strong> Delhi's long-period average monsoon rainfall is <strong>640.4mm</strong> (Jun–Sep, based on 1971–2020 IMD data). The drainage system was originally designed in 1976 for 50mm/day capacity for a city of 6 million. Current population exceeds 32 million.
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <!-- ═══════════════════════════════════════
+           PAGE: ALERTS
+           ═══════════════════════════════════════ -->
+        <div class="page page-content page-hidden" id="page-alerts">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-md)">
+            <h2 style="font-size:18px;font-weight:600">Active Alerts & Operations</h2>
+            <div style="display:flex;gap:var(--space-sm)">
+              <button class="btn btn-ghost btn-sm">🔕 Mute All</button>
+              <button class="btn btn-primary btn-sm">✅ Acknowledge All</button>
+            </div>
+          </div>
+
+          <div id="alerts-dynamic-list">
+            <!-- Dynamically rendered from live weather data by app.js -->
+            <div class="empty-state" style="padding:var(--space-2xl)">
+              <div class="empty-state-icon">🔄</div>
+              <div>Loading live weather alerts...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+           PAGE: SCENARIO SIMULATOR
+           ═══════════════════════════════════════ -->
+        <div class="page page-content page-hidden" id="page-scenario">
+          <div style="margin-bottom:var(--space-lg)">
+            <h2 style="font-size:18px;font-weight:600;margin-bottom:4px">🔮 Flood Scenario Simulator</h2>
+            <p style="font-size:13px;color:var(--text-muted)">Simulate "what-if" rainfall events and predict which
+              hotspots will flood using SCS-CN hydrology method</p>
+          </div>
+
+          <div class="card" style="margin-bottom:var(--space-md)">
+            <div class="card-body">
+              <div class="sim-controls">
+                <div class="sim-slider-group">
+                  <div class="form-label">Rainfall Amount: <strong id="sim-rainfall-val">100 mm</strong></div>
+                  <input type="range" class="sim-slider" id="sim-rainfall" min="10" max="300" value="100" step="5">
+                  <div
+                    style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:2px">
+                    <span>10mm (Light)</span>
+                    <span>150mm (Heavy)</span>
+                    <span>300mm (Extreme)</span>
+                  </div>
+                </div>
+                <div class="sim-slider-group">
+                  <div class="form-label">Duration: <strong id="sim-duration-val">3 hrs</strong></div>
+                  <input type="range" class="sim-slider" id="sim-duration" min="1" max="24" value="3" step="1">
+                  <div
+                    style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:2px">
+                    <span>1 hr</span>
+                    <span>12 hrs</span>
+                    <span>24 hrs</span>
+                  </div>
+                </div>
+                <button class="btn btn-primary" id="sim-run-btn" style="white-space:nowrap">▶ Run Simulation</button>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:var(--space-md);margin-bottom:var(--space-md)">
+                <div style="font-size:14px;font-weight:600">Hotspots Flooding: <span id="sim-count"
+                    style="color:var(--accent-red)">—</span></div>
+                <div style="font-size:12px;color:var(--text-muted)" id="sim-summary">Click "Run Simulation" to see
+                  results</div>
+              </div>
+
+              <div class="sim-result-grid" id="sim-results">
+                <div class="empty-state" style="grid-column:1/-1">
+                  <div class="empty-state-icon">🔮</div>
+                  <div>Configure rainfall parameters and run simulation</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pre-built scenarios -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">📋 Standard Design Storm Scenarios</span>
+            </div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:var(--space-sm)">
+                <button class="btn btn-ghost"
+                  onclick="document.getElementById('sim-rainfall').value=50;document.getElementById('sim-duration').value=3;document.getElementById('sim-rainfall-val').textContent='50 mm';document.getElementById('sim-duration-val').textContent='3 hrs';"
+                  style="text-align:center;flex-direction:column;padding:var(--space-md)">
+                  <div style="font-size:16px;font-weight:700">2-Year</div>
+                  <div style="font-size:11px;color:var(--text-muted)">50mm / 3hr</div>
+                </button>
+                <button class="btn btn-ghost"
+                  onclick="document.getElementById('sim-rainfall').value=80;document.getElementById('sim-duration').value=3;document.getElementById('sim-rainfall-val').textContent='80 mm';document.getElementById('sim-duration-val').textContent='3 hrs';"
+                  style="text-align:center;flex-direction:column;padding:var(--space-md)">
+                  <div style="font-size:16px;font-weight:700">5-Year</div>
+                  <div style="font-size:11px;color:var(--text-muted)">80mm / 3hr</div>
+                </button>
+                <button class="btn btn-ghost"
+                  onclick="document.getElementById('sim-rainfall').value=120;document.getElementById('sim-duration').value=3;document.getElementById('sim-rainfall-val').textContent='120 mm';document.getElementById('sim-duration-val').textContent='3 hrs';"
+                  style="text-align:center;flex-direction:column;padding:var(--space-md)">
+                  <div style="font-size:16px;font-weight:700">10-Year</div>
+                  <div style="font-size:11px;color:var(--text-muted)">120mm / 3hr</div>
+                </button>
+                <button class="btn btn-ghost"
+                  onclick="document.getElementById('sim-rainfall').value=180;document.getElementById('sim-duration').value=3;document.getElementById('sim-rainfall-val').textContent='180 mm';document.getElementById('sim-duration-val').textContent='3 hrs';"
+                  style="text-align:center;flex-direction:column;padding:var(--space-md)">
+                  <div style="font-size:16px;font-weight:700">25-Year</div>
+                  <div style="font-size:11px;color:var(--text-muted)">180mm / 3hr</div>
+                </button>
+                <button class="btn btn-ghost"
+                  onclick="document.getElementById('sim-rainfall').value=250;document.getElementById('sim-duration').value=3;document.getElementById('sim-rainfall-val').textContent='250 mm';document.getElementById('sim-duration-val').textContent='3 hrs';"
+                  style="text-align:center;flex-direction:column;padding:var(--space-md)">
+                  <div style="font-size:16px;font-weight:700">50-Year</div>
+                  <div style="font-size:11px;color:var(--text-muted)">250mm / 3hr</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+           PAGE: ANALYTICS
+           ═══════════════════════════════════════ -->
+        <div class="page page-content page-hidden" id="page-analytics">
+          <h2 style="font-size:18px;font-weight:600;margin-bottom:var(--space-md)">📈 Analytics & Reports</h2>
+          <div class="dashboard-grid-3">
+            <div class="card">
+              <div class="card-body" style="text-align:center;padding:var(--space-2xl)">
+                <div style="font-size:40px;margin-bottom:var(--space-md)">📄</div>
+                <div style="font-weight:600;margin-bottom:4px">Pre-Monsoon Readiness Report</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:var(--space-md)">City-wide PMRS summary
+                  with ward rankings</div>
+                <button class="btn btn-primary btn-sm">Generate PDF</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body" style="text-align:center;padding:var(--space-2xl)">
+                <div style="font-size:40px;margin-bottom:var(--space-md)">📊</div>
+                <div style="font-weight:600;margin-bottom:4px">Post-Event Analysis</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:var(--space-md)">Prediction accuracy &
+                  response assessment</div>
+                <button class="btn btn-ghost btn-sm">Coming Soon</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body" style="text-align:center;padding:var(--space-2xl)">
+                <div style="font-size:40px;margin-bottom:var(--space-md)">📥</div>
+                <div style="font-weight:600;margin-bottom:4px">Data Export</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:var(--space-md)">Export hotspots, PMRS,
+                  rainfall as CSV/GeoJSON</div>
+                <button class="btn btn-ghost btn-sm">Export</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+           PAGE: ADMINISTRATION
+           ═══════════════════════════════════════ -->
+        <div class="page page-content page-hidden" id="page-admin">
+          <!-- Admin Password Lock (shown when not authenticated) -->
+          <div id="admin-lock-screen" class="admin-lock-overlay">
+            <div class="admin-lock-icon">🔐</div>
+            <div class="admin-lock-card">
+              <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-primary)">Admin Access</h2>
+              <p style="font-size:13px;color:var(--text-muted);margin-bottom:var(--space-lg)">This section is restricted. Enter the administrator password to continue.</p>
+              <input type="password" class="admin-pw-input" id="admin-pw-input" placeholder="Enter password" autocomplete="off">
+              <div class="admin-error-msg" id="admin-error-msg">❌ Incorrect password. Please try again.</div>
+              <button class="btn btn-primary" style="width:100%;padding:12px" onclick="window.checkAdminPassword()">
+                🔓 Unlock Admin Panel
+              </button>
+              <p style="font-size:11px;color:var(--text-muted);margin-top:var(--space-md)">
+                Authorized personnel only · UFHE Administration
+              </p>
+            </div>
+          </div>
+          <!-- Admin Content (hidden until password unlocked) -->
+          <div id="admin-content" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-md)">
+              <h2 style="font-size:18px;font-weight:700;">⚙️ Administration Panel</h2>
+              <div style="display:flex;gap:var(--space-sm);align-items:center">
+                <span style="font-size:12px;color:var(--accent-green);background:rgba(52,211,153,0.1);padding:4px 10px;border-radius:6px;border:1px solid rgba(52,211,153,0.2)">🔓 Authenticated</span>
+                <button class="btn btn-ghost btn-sm" onclick="window.lockAdmin()">🔒 Lock</button>
+              </div>
+            </div>
+          <div class="dashboard-grid">
+            <div class="card">
+              <div class="card-header"><span class="card-title">👥 User Management</span></div>
+              <div class="card-body">
+                <div style="display:grid;gap:var(--space-sm)">
+                  <div class="action-item">
+                    <div
+                      style="width:32px;height:32px;border-radius:50%;background:var(--accent-blue-dim);display:flex;align-items:center;justify-content:center">
+                      👤</div>
+                    <div class="action-content">
+                      <div style="font-weight:500">Commissioner Sharma</div>
+                      <div style="font-size:11px;color:var(--text-muted)">SUPER_ADMIN · City-wide access</div>
+                    </div>
+                    <span class="action-status status-done">Active</span>
+                  </div>
+                  <div class="action-item">
+                    <div
+                      style="width:32px;height:32px;border-radius:50%;background:var(--accent-green-dim);display:flex;align-items:center;justify-content:center">
+                      👤</div>
+                    <div class="action-content">
+                      <div style="font-weight:500">Eng. Priya Patil</div>
+                      <div style="font-size:11px;color:var(--text-muted)">WARD_ENGINEER · Ward F/S (Parel)</div>
+                    </div>
+                    <span class="action-status status-done">Active</span>
+                  </div>
+                  <div class="action-item">
+                    <div
+                      style="width:32px;height:32px;border-radius:50%;background:var(--accent-yellow-dim);display:flex;align-items:center;justify-content:center">
+                      👤</div>
+                    <div class="action-content">
+                      <div style="font-weight:500">Supervisor Raju</div>
+                      <div style="font-size:11px;color:var(--text-muted)">FIELD_STAFF · Ward K/E (Andheri)</div>
+                    </div>
+                    <span class="action-status status-done">Active</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">🔧 Configuration</span></div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">PMRS Infrastructure Weight (%)</label>
+                  <input type="number" class="form-input" value="30" min="0" max="100">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">PMRS Vulnerability Weight (%)</label>
+                  <input type="number" class="form-input" value="25" min="0" max="100">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">PMRS Response Weight (%)</label>
+                  <input type="number" class="form-input" value="25" min="0" max="100">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">PMRS Historical Weight (%)</label>
+                  <input type="number" class="form-input" value="20" min="0" max="100">
+                </div>
+                <button class="btn btn-primary" style="margin-top:var(--space-sm)">Save Configuration</button>
+              </div>
+            </div>
+          </div>
+          </div> <!-- /admin-content -->
+        </div>
+
+        <!-- ═══════════════════════════════════════
+           PAGE: DRAINAGE INFRASTRUCTURE
+           ═══════════════════════════════════════ -->
+        <div class="page page-content page-hidden" id="page-drainage">
+          <!-- Hero Banner -->
+          <div class="page-hero" style="background:linear-gradient(135deg, rgba(26,34,54,0.95), rgba(52,211,153,0.12))">
+            <div class="page-hero-content">
+              <div class="page-hero-title">
+                <div class="section-illustration" style="background:rgba(52,211,153,0.15)">🔧</div>
+                Drainage Infrastructure & Pipeline Analysis
+              </div>
+              <div class="page-hero-desc">Mumbai's 2,500km stormwater drainage network mapped with pipe-level slope
+                gradients, flow capacity, siltation, and elevation data from MCGM's SWD department.</div>
+              <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-sm)">
+                <span class="data-source-badge"><span class="source-dot"></span> MCGM SWD Reports 2024</span>
+                <span class="data-source-badge"><span class="source-dot"></span> SRTM DEM (30m)</span>
+              </div>
+            </div>
+            <div class="page-hero-illustration">🏗️</div>
+          </div>
+
+          <!-- Inline placeholder: Mumbai drainage infrastructure -->
+          <div class="inline-img-section" style="background:linear-gradient(135deg, #0a2e5c, #0d3b6e);display:flex;align-items:center;justify-content:center;min-height:140px;">
+            <div style="text-align:center;">
+              <div style="font-size:56px;margin-bottom:8px;">🏗️🌊🔧</div>
+              <div style="font-weight:600;font-size:14px;color:var(--text-primary)">Mumbai SWD Network — Monsoon Preparedness 2024</div>
+              <div style="font-size:11px;color:var(--text-muted)">Stormwater drainage infrastructure · Source: MCGM Operations</div>
+            </div>
+          </div>
+
+          <!-- Drainage Stats -->
+          <div class="metrics-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:var(--space-md)">
+            <div class="metric-card blue">
+              <div class="metric-card-label">Total Drains</div>
+              <div class="metric-card-value">15</div>
+              <div class="metric-card-sub">5 Primary · 10 Secondary</div>
+            </div>
+            <div class="metric-card red">
+              <div class="metric-card-label">Critical Condition</div>
+              <div class="metric-card-value">2</div>
+              <div class="metric-card-sub">Hindmata SWD · Vakola</div>
+            </div>
+            <div class="metric-card yellow">
+              <div class="metric-card-label">Pipeline Segments</div>
+              <div class="metric-card-value">12</div>
+              <div class="metric-card-sub">4 Critical risk</div>
+            </div>
+            <div class="metric-card green">
+              <div class="metric-card-label">Avg Slope</div>
+              <div class="metric-card-value">0.14%</div>
+              <div class="metric-card-sub">Min: 0.05% · Max: 0.85%</div>
+            </div>
+            <div class="metric-card" style="border-top:2px solid var(--accent-purple)">
+              <div class="metric-card-label">Total Network</div>
+              <div class="metric-card-value">115 km</div>
+              <div class="metric-card-sub">SWD pipeline length</div>
+            </div>
+          </div>
+
+          <!-- Drainage Table -->
+          <div class="card" style="margin-bottom:var(--space-md)">
+            <div class="card-header">
+              <span class="card-title">🔧 Drainage Network — Pipeline Details</span>
+            </div>
+            <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+              <table class="hotspot-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Ward</th>
+                    <th>Length (km)</th>
+                    <th>Diameter</th>
+                    <th>Material</th>
+                    <th>Slope ↘</th>
+                    <th>Elev (Up→Down)</th>
+                    <th>Siltation</th>
+                    <th>Condition</th>
+                    <th>Last Desilted</th>
+                  </tr>
+                </thead>
+                <tbody id="drainage-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Pipeline Segments -->
+          <div class="card" style="margin-bottom:var(--space-md)">
+            <div class="card-header">
+              <span class="card-title">📐 Pipeline Segment Flow Analysis</span>
+              <span style="font-size:11px;color:var(--text-muted)">Segment-level slope, velocity & capacity
+                utilization</span>
+            </div>
+            <div style="overflow-x:auto;max-height:400px;overflow-y:auto">
+              <table class="hotspot-table">
+                <thead>
+                  <tr>
+                    <th>Segment</th>
+                    <th>Slope %</th>
+                    <th>Velocity (m/s)</th>
+                    <th>Design Cap.</th>
+                    <th>Current Cap.</th>
+                    <th>Utilization</th>
+                    <th>Siltation</th>
+                    <th>Material</th>
+                    <th>Risk</th>
+                  </tr>
+                </thead>
+                <tbody id="pipeline-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Slope Analysis -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">⛰️ Ward Terrain & Slope Analysis</span>
+              <span style="font-size:11px;color:var(--text-muted)">Higher flat area % = higher flood risk (water
+                pooling)</span>
+            </div>
+            <div style="overflow-x:auto;max-height:360px;overflow-y:auto">
+              <table class="hotspot-table">
+                <thead>
+                  <tr>
+                    <th>Ward</th>
+                    <th>Avg Elev (m)</th>
+                    <th>Min / Max (m)</th>
+                    <th>Avg Slope (°)</th>
+                    <th>Flat Area %</th>
+                    <th>Drainage Direction</th>
+                    <th>Flood Risk</th>
+                  </tr>
+                </thead>
+                <tbody id="slope-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════
+           PAGE: CITIZEN REPORTING
+           ═══════════════════════════════════════ -->
+        <div class="page page-content page-hidden" id="page-citizen">
+          <!-- Hero Banner -->
+          <div class="page-hero" style="background:linear-gradient(135deg, rgba(26,34,54,0.95), rgba(239,68,68,0.1))">
+            <div class="page-hero-content">
+              <div class="page-hero-title">
+                <div class="section-illustration" style="background:rgba(239,68,68,0.15)">📱</div>
+                Citizen Flood Reporting Portal
+              </div>
+              <div class="page-hero-desc">Help Mumbai stay flood-safe. Report waterlogging, blocked drains, and
+                overflowing manholes with GPS location and photos. Your reports reach the MCGM SWD war room directly.
+              </div>
+              <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-sm)">
+                <span class="data-source-badge" style="background:rgba(239,68,68,0.1);color:var(--accent-red)"><span
+                    class="source-dot" style="background:var(--accent-red)"></span> MCGM Complaints Portal</span>
+                <span class="data-source-badge"><span class="source-dot"></span> GPS Location API</span>
+              </div>
+            </div>
+            <div class="page-hero-illustration">🌊</div>
+          </div>
+
+          <!-- Inline placeholder: Citizen reporting context -->
+          <div class="inline-img-section" style="background:linear-gradient(135deg, #3b0a0a, #5c1a1a);display:flex;align-items:center;justify-content:center;min-height:140px;">
+            <div style="text-align:center;">
+              <div style="font-size:56px;margin-bottom:8px;">🆘📱🌧️</div>
+              <div style="font-weight:600;font-size:14px;color:var(--text-primary)">Citizens are the first responders — your eyes save lives</div>
+              <div style="font-size:11px;color:var(--text-muted)">8 active reports this week · Average response: 4.2 hours</div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <!-- Left: Complaint Form -->
+            <div>
+              <div style="margin-bottom:var(--space-md)">
+                <h2 style="font-size:18px;font-weight:600;margin-bottom:4px">📝 Report a Problem</h2>
+                <p style="font-size:13px;color:var(--text-muted)">Fill the form below — attach photos for faster
+                  response</p>
+              </div>
+              <div class="complaint-form-card">
+                <div class="form-group">
+                  <label class="form-label">Your Name *</label>
+                  <input type="text" class="form-input" id="cc-name" placeholder="Enter your full name">
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Phone Number *</label>
+                    <input type="tel" class="form-input" id="cc-phone" placeholder="98XX-XXXXXX">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Ward *</label>
+                    <select class="form-input" id="cc-ward" style="background:var(--bg-input)">
+                      <option value="">Select Ward</option>
+                      <option value="A">A — Fort/Colaba</option>
+                      <option value="B">B — Dongri</option>
+                      <option value="C">C — Marine Lines</option>
+                      <option value="D">D — Grant Road</option>
+                      <option value="E">E — Byculla</option>
+                      <option value="F/N">F/N — Matunga</option>
+                      <option value="F/S">F/S — Parel</option>
+                      <option value="G/N">G/N — Dadar</option>
+                      <option value="G/S">G/S — Worli</option>
+                      <option value="H/E">H/E — Khar/Santacruz</option>
+                      <option value="H/W">H/W — Bandra</option>
+                      <option value="K/E">K/E — Andheri East</option>
+                      <option value="K/W">K/W — Andheri West</option>
+                      <option value="L">L — Kurla</option>
+                      <option value="M/E">M/E — Chembur</option>
+                      <option value="M/W">M/W — Mahim</option>
+                      <option value="N">N — Ghatkopar</option>
+                      <option value="P/N">P/N — Malad</option>
+                      <option value="P/S">P/S — Goregaon</option>
+                      <option value="R/C">R/C — Kandivali</option>
+                      <option value="R/S">R/S — Dahisar</option>
+                      <option value="S">S — Borivali</option>
+                      <option value="T">T — Mulund</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Issue Type *</label>
+                  <select class="form-input" id="cc-type" style="background:var(--bg-input)">
+                    <option value="BLOCKAGE">🚫 Drain Blockage</option>
+                    <option value="OVERFLOW">💧 Manhole Overflow</option>
+                    <option value="WATERLOGGING">🌊 Waterlogging</option>
+                    <option value="DAMAGE">🔧 Infrastructure Damage</option>
+                    <option value="OTHER">📝 Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Description *</label>
+                  <textarea class="form-textarea" id="cc-desc"
+                    placeholder="Describe the issue in detail — location landmarks, water depth, affected area..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Upload Photos / Videos</label>
+                  <div class="file-upload-zone" id="cc-upload-zone">
+                    <div class="file-upload-icon">📷</div>
+                    <div class="file-upload-text"><strong>Click to upload</strong> or drag & drop</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:4px">JPG, PNG, MP4 up to 10MB</div>
+                    <input type="file" id="cc-file-input" accept="image/*,video/*" multiple style="display:none">
+                  </div>
+                  <div class="file-preview" id="cc-file-preview"></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Location</label>
+                  <div style="display:flex;gap:var(--space-sm);align-items:center">
+                    <button class="location-btn" id="cc-geoloc-btn">📍 Use My Current Location</button>
+                    <span id="cc-location-text" style="font-size:12px;color:var(--text-muted)">No location set</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-md)">
+                  <button class="btn btn-primary" id="cc-submit-btn">📤 Submit Complaint</button>
+                  <button class="btn btn-ghost" type="reset">Clear Form</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Existing Complaints -->
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-md)">
+                <h2 style="font-size:18px;font-weight:600">📋 Recent Citizen Reports</h2>
+                <span style="font-size:12px;color:var(--text-muted)" id="cc-total-count">8 reports</span>
+              </div>
+              <div id="complaints-list" style="max-height:calc(100vh - 160px);overflow-y:auto"></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /main-content -->
+    </div><!-- /app-shell -->
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+      <div class="bottom-nav-item active" data-page="dashboard" onclick="window.navigateTo('dashboard')">
+        <span class="nav-emoji">📊</span>
+        <span>Dashboard</span>
+      </div>
+      <div class="bottom-nav-item" data-page="map" onclick="window.navigateTo('map')">
+        <span class="nav-emoji">🗺️</span>
+        <span>Map</span>
+      </div>
+      <div class="bottom-nav-item" data-page="hotspots" onclick="window.navigateTo('hotspots')">
+        <span class="nav-emoji">🎯</span>
+        <span>Hotspots</span>
+      </div>
+      <div class="bottom-nav-item" data-page="alerts" onclick="window.navigateTo('alerts')">
+        <span class="nav-emoji">🚨</span>
+        <span>Alerts</span>
+      </div>
+      <div class="bottom-nav-item" data-page="citizen" onclick="window.navigateTo('citizen')">
+        <span class="nav-emoji">📱</span>
+        <span>Report</span>
+      </div>
+    </nav>
+
+    <!-- Footer -->
+    <div class="app-footer"
+      style="position:fixed;bottom:0;left:0;right:0;z-index:50;background:#081230;">
+      <div>UFHE v2.0 — Urban Flooding &amp; Hydrology Engine · Built for <strong style="color:var(--accent-blue)">India
+          Innovates 2026</strong></div>
+      <div style="display:flex;gap:var(--space-md);align-items:center">
+        <span>Data: <a href="https://open-meteo.com" target="_blank">Open-Meteo</a> · <a
+            href="https://www.openstreetmap.org" target="_blank">OSM</a> · MCGM SWD</span>
+        <span>·</span>
+        <span style="color:#bef264; font-weight:700;">Made by Team Meghalysts</span>
+      </div>
+    </div>
+
+    <script>
+      window.navigateTo = function (page) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+        document.querySelectorAll('.page').forEach(el => el.classList.add('page-hidden'));
+        const pageEl = document.getElementById(`page-${page}`);
+        if (pageEl) { pageEl.classList.remove('page-hidden'); pageEl.classList.add('animate-in'); }
+        window.dispatchEvent(new CustomEvent('navigate', { detail: page }));
+      };
+
+      // Generate rain drops for ambient monsoon animation
+      (function initRain() {
+        const overlay = document.getElementById('rain-overlay');
+        if (!overlay) return;
+        for (let i = 0; i < 35; i++) {
+          const drop = document.createElement('div');
+          drop.className = 'raindrop';
+          drop.style.left = Math.random() * 100 + '%';
+          drop.style.height = (15 + Math.random() * 25) + 'px';
+          drop.style.animationDuration = (1.5 + Math.random() * 2.5) + 's';
+          drop.style.animationDelay = Math.random() * 4 + 's';
+          overlay.appendChild(drop);
+        }
+      })();
+    </script>
+    <script type="module" src="src/js/app.js"></script>
+
+    <!-- Mobile Preview Overlay -->
+    <div id="mobile-preview-overlay" style="display:none; position:fixed; inset:0; background:rgba(10,22,40,0.95); backdrop-filter:blur(8px); z-index:99999; align-items:center; justify-content:center; flex-direction:column;">
+      <div style="margin-bottom:20px; text-align:center;">
+        <h3 style="color:#fff; font-weight:600; margin-bottom:8px;">📱 Mobile View Simulator</h3>
+        <button class="btn btn-primary" onclick="closeMobilePreview()" style="box-shadow:0 4px 15px rgba(56,189,248,0.4)">Return to Desktop View</button>
+      </div>
+      <div style="width:375px; height:812px; border:14px solid #111; border-radius:40px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.8); position:relative;">
+        <div style="position:absolute; top:0; left:50%; transform:translateX(-50%); width:120px; height:25px; background:#111; border-bottom-left-radius:15px; border-bottom-right-radius:15px; z-index:10;"></div>
+        <iframe src="" id="mobile-preview-iframe" style="width:100%; height:100%; border:none; background:#0a1628;"></iframe>
+      </div>
+    </div>
+
+    <script>
+      window.openMobilePreview = function() {
+        document.getElementById('mobile-preview-overlay').style.display = 'flex';
+        document.getElementById('mobile-preview-iframe').src = window.location.href;
+      }
+      window.closeMobilePreview = function() {
+        document.getElementById('mobile-preview-overlay').style.display = 'none';
+        document.getElementById('mobile-preview-iframe').src = '';
+      }
+    </script>
+</body>
+
+</html>

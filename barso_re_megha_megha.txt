@@ -1,0 +1,2060 @@
+UFHE — Product Requirements Document (PRD)
+& Complete Data Source Directory
+PART A: PRODUCT REQUIREMENTS DOCUMENT
+1. DOCUMENT HEADER
+text
+
+┌──────────────────────────────────────────────────────────────────┐
+│  PRODUCT REQUIREMENTS DOCUMENT                                    │
+├──────────────────────────────────────────────────────────────────┤
+│  Product Name  : Urban Flooding & Hydrology Engine (UFHE)        │
+│  Version       : 1.0                                             │
+│  Document Owner: [Your Name / Team Lead]                         │
+│  Last Updated  : [Current Date]                                  │
+│  Status        : DRAFT → REVIEW → APPROVED                      │
+│                                                                  │
+│  Stakeholders:                                                   │
+│  ├── Municipal Corporation (Primary Customer)                    │
+│  ├── Ward Engineers (Primary Users)                              │
+│  ├── City Commissioner / Mayor (Executive Sponsor)               │
+│  ├── Disaster Management Authority (Partner)                     │
+│  ├── Meteorological Department (Data Provider)                   │
+│  └── Citizens (End Beneficiaries)                                │
+└──────────────────────────────────────────────────────────────────┘
+2. PRODUCT VISION & OBJECTIVES
+2.1 Vision Statement
+text
+
+"Transform urban flood management from REACTIVE crisis response 
+to PROACTIVE, data-driven prevention by giving every city ward 
+a living, breathing flood intelligence system that predicts 
+waterlogging before the first drop falls."
+2.2 Problem Statement
+text
+
+┌──────────────────────────────────────────────────────────────────┐
+│  THE PROBLEM (Quantified)                                        │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  CURRENT STATE:                                                  │
+│  • Indian cities lose ₹15,000-50,000 Cr annually to urban       │
+│    flooding (NDMA estimates)                                     │
+│  • Average response time after waterlogging: 4-12 hours          │
+│  • 70% of drainage infrastructure condition: UNKNOWN             │
+│  • Flood prediction: based on "gut feel" + last year's memory    │
+│  • Resource deployment: ad-hoc, reactive, politically driven     │
+│  • Zero quantified ward-level readiness benchmarking             │
+│                                                                  │
+│  ROOT CAUSES:                                                    │
+│  • No unified spatial view of terrain + drainage + rainfall      │
+│  • Drainage capacity data exists in paper registers, if at all   │
+│  • No systematic method to identify ALL vulnerable micro-zones   │
+│  • Pre-monsoon preparation is checklist-based, not risk-based    │
+│  • No feedback loop: same areas flood year after year            │
+│                                                                  │
+│  DESIRED STATE:                                                  │
+│  • Every 50m × 50m patch of the city has a flood risk score      │
+│  • Ward engineers know EXACTLY which spots will flood and WHY    │
+│  • Resources pre-positioned HOURS before rain, not after         │
+│  • Commissioner has a single dashboard: "Are we ready? Where     │
+│    are we NOT ready?"                                            │
+│  • Year-over-year measurable improvement in flood outcomes       │
+└──────────────────────────────────────────────────────────────────┘
+2.3 Success Metrics (OKRs)
+text
+
+┌──────────────────────────────────────────────────────────────────┐
+│  OBJECTIVE 1: Accurate Flood Prediction                          │
+│  ├── KR1: Identify 2,500+ micro-hotspots with >80% recall       │
+│  ├── KR2: Predict flood depth within ±20cm RMSE                  │
+│  ├── KR3: Provide 3+ hours lead time for resource deployment     │
+│  └── KR4: False negative rate < 15% (missed real floods)         │
+│                                                                  │
+│  OBJECTIVE 2: Proactive Readiness                                │
+│  ├── KR1: 100% wards scored on PMRS before every monsoon         │
+│  ├── KR2: Average PMRS improves by 15 points year-over-year      │
+│  ├── KR3: 90% of critical hotspots have pre-positioned resources │
+│  └── KR4: Response time reduced from 6hrs to <2hrs               │
+│                                                                  │
+│  OBJECTIVE 3: Platform Adoption                                  │
+│  ├── KR1: 100% ward engineers trained and using weekly           │
+│  ├── KR2: Commissioner reviews dashboard at least 2×/week        │
+│  │         during monsoon                                        │
+│  ├── KR3: Field teams using mobile app for 80% of deployments    │
+│  └── KR4: System uptime > 99.5% during monsoon months            │
+│                                                                  │
+│  OBJECTIVE 4: Measurable Impact                                  │
+│  ├── KR1: 30% reduction in waterlogging complaints (Year 1)      │
+│  ├── KR2: 50% reduction in flood-related road closures           │
+│  ├── KR3: Zero flood-related deaths in mapped hotspots           │
+│  └── KR4: ₹X Cr estimated damage prevented (economic model)     │
+└──────────────────────────────────────────────────────────────────┘
+3. USER PERSONAS & JOURNEYS
+3.1 Persona Definitions
+text
+
+┌──────────────────────────────────────────────────────────────────┐
+│  PERSONA 1: "Commissioner Sharma"                                │
+│  ══════════════════════════════════                               │
+│  Role: Municipal Commissioner / Additional Commissioner          │
+│  Age: 50-58 | IAS Officer                                       │
+│  Tech Comfort: Medium (uses email, WhatsApp, basic dashboards)   │
+│                                                                  │
+│  GOALS:                                                          │
+│  • Single-screen city-wide flood readiness overview              │
+│  • Know which wards need intervention BEFORE monsoon             │
+│  • Defend budget allocation with data                            │
+│  • Avoid media embarrassment from preventable flooding           │
+│  • Compare ward performance objectively                          │
+│                                                                  │
+│  PAIN POINTS:                                                    │
+│  • Gets 50+ WhatsApp messages during heavy rain                  │
+│  • No single source of truth                                     │
+│  • Can't tell which complaints are genuine emergencies           │
+│  • Ward engineers blame rain intensity; no way to verify         │
+│                                                                  │
+│  KEY INSIGHT: Needs SIMPLICITY. Traffic-light colors.            │
+│  Wants to open one screen and know: "Where are we screwed?"      │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  PERSONA 2: "Engineer Priya"                                    │
+│  ════════════════════════════                                    │
+│  Role: Ward Engineer / Assistant Engineer                        │
+│  Age: 30-45 | Civil Engineering background                       │
+│  Tech Comfort: Medium-High (uses GIS apps, smart phone native)   │
+│                                                                  │
+│  GOALS:                                                          │
+│  • Know exactly WHICH drains to desilt first (priority order)    │
+│  • Justify equipment requests with flood risk data               │
+│  • Get early warning to pre-position pumps                       │
+│  • Track her ward's readiness progress                           │
+│  • Reduce complaint volume through prevention                    │
+│                                                                  │
+│  PAIN POINTS:                                                    │
+│  • Manages 50+ km of drainage, can't inspect everything         │
+│  • Limited pumps (3-4) for 15+ potential flood spots             │
+│  • Complaint data is unstructured and overwhelming               │
+│  • No historical analysis of which interventions worked          │
+│                                                                  │
+│  KEY INSIGHT: Needs ACTIONABLE details. "Do THIS at THAT         │
+│  location by THIS date." Prioritized checklist.                  │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  PERSONA 3: "Supervisor Raju"                                   │
+│  ════════════════════════════                                    │
+│  Role: Field Supervisor / Pump Operator                          │
+│  Age: 35-50 | ITI/Diploma background                            │
+│  Tech Comfort: Low-Medium (smartphone, WhatsApp, basic apps)     │
+│                                                                  │
+│  GOALS:                                                          │
+│  • Know where to go and what to carry BEFORE rain starts         │
+│  • Navigate to exact flood location quickly                      │
+│  • Report status back without writing lengthy reports            │
+│  • Know when it's safe to leave / move to next location          │
+│                                                                  │
+│  PAIN POINTS:                                                    │
+│  • Gets contradictory instructions from multiple sources         │
+│  • Arrives at location without right equipment                   │
+│  • No systematic way to report ground conditions                 │
+│  • Works 16+ hour shifts during heavy rain, low visibility      │
+│                                                                  │
+│  KEY INSIGHT: Needs SIMPLE MOBILE APP. Maps, directions,         │
+│  one-tap status updates. Works offline in poor connectivity.     │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  PERSONA 4: "Citizen Ananya"                                    │
+│  ════════════════════════════                                    │
+│  Role: Resident of flood-prone area                              │
+│  Age: 25-60 | Various backgrounds                               │
+│  Tech Comfort: Varies                                            │
+│                                                                  │
+│  GOALS:                                                          │
+│  • Know if her area will flood today                             │
+│  • Report waterlogging and get response                          │
+│  • See that government is taking action                          │
+│  • Plan her commute around flood-prone routes                    │
+│                                                                  │
+│  KEY INSIGHT: Needs TRANSPARENCY. Public flood risk map.         │
+│  SMS/notification alerts. Complaint tracking.                    │
+└──────────────────────────────────────────────────────────────────┘
+3.2 User Journey Maps
+text
+
+JOURNEY: "Commissioner Sharma — Pre-Monsoon Review" (May)
+═══════════════════════════════════════════════════════════
+
+Step 1: LOGIN → Dashboard
+        ↓
+Step 2: SEE city-wide PMRS summary
+        "Average: 58/100 | Grade C | 12 wards below 40"
+        ↓
+Step 3: CLICK worst-performing wards → see specific gaps
+        "Ward 47: Desilting 20% complete. 3 pumps non-functional."
+        ↓
+Step 4: GENERATE "Pre-Monsoon Readiness Report" (PDF)
+        Auto-generated with ward rankings, gap analysis, 
+        recommended budget allocation
+        ↓
+Step 5: SHARE report with ward engineers with deadlines
+        "Ward 47: Complete desilting by June 5. Fix pumps by June 1."
+        ↓
+Step 6: TRACK progress weekly on dashboard
+        Watch PMRS scores improve as tasks are completed
+        ↓
+Step 7: BY JUNE 15: All wards at Grade B or above = READY
+
+
+JOURNEY: "Engineer Priya — Active Rainfall Event" (July)
+═══════════════════════════════════════════════════════════
+
+Step 1: RECEIVE push notification at 10:00 AM
+        "⚠️ ORANGE ALERT: 65mm/hr rainfall predicted for your 
+        ward in next 3 hours. 8 hotspots at HIGH risk."
+        ↓
+Step 2: OPEN app → see ward map with 8 highlighted hotspots
+        Each hotspot shows: predicted depth, timing, affected pop.
+        ↓
+Step 3: VIEW auto-generated deployment plan
+        "Pump A → Hotspot #3 (80cm predicted) by 11:00 AM
+         Pump B → Hotspot #7 (55cm predicted) by 11:00 AM
+         Barrier → Hotspot #1 (underpass, close by 10:30 AM)"
+        ↓
+Step 4: APPROVE / MODIFY plan → sends instructions to field teams
+        ↓
+Step 5: MONITOR real-time during rain
+        See actual sensor readings vs predictions
+        Receive field team status updates
+        ↓
+Step 6: POST-EVENT: Review performance
+        "6 of 8 hotspots correctly predicted. 
+         Hotspot #3: predicted 80cm, actual 65cm. ✓
+         Hotspot #5: predicted 20cm, actual 45cm. ✗ Investigate."
+4. FUNCTIONAL REQUIREMENTS
+4.1 Feature Specification — Module Breakdown
+text
+
+┌──────────────────────────────────────────────────────────────────┐
+│  MODULE 1: GIS MAP ENGINE (Core Visualization)                   │
+│  Priority: P0 (Must Have)                                        │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  F1.1  Interactive web map with pan, zoom, search                │
+│        - Base layer: satellite imagery + street map toggle       │
+│        - Coordinate display, measurement tools                   │
+│        - Print/export map as image or PDF                        │
+│                                                                  │
+│  F1.2  Layer management panel                                    │
+│        - Toggle ON/OFF: ward boundaries, micro-basins,           │
+│          drainage network, flood hotspots, DEM hillshade,        │
+│          land use, building footprints, water bodies             │
+│        - Opacity slider per layer                                │
+│        - Legend auto-updates with visible layers                  │
+│                                                                  │
+│  F1.3  Thematic mapping                                          │
+│        - Choropleth: wards colored by PMRS score                 │
+│        - Graduated symbols: hotspots sized by severity           │
+│        - Heatmap: flood risk density                             │
+│        - Drainage network colored by capacity utilization %      │
+│                                                                  │
+│  F1.4  Spatial query tools                                       │
+│        - Click any location → show flood risk, elevation,        │
+│          nearest drain, ward info, historical floods             │
+│        - Draw polygon → get aggregate statistics                 │
+│        - Buffer query: "Show all hotspots within 500m of         │
+│          this hospital"                                          │
+│                                                                  │
+│  F1.5  3D terrain visualization                                  │
+│        - DEM-based 3D view (Deck.gl TerrainLayer)                │
+│        - Flood depth overlay on 3D terrain                       │
+│        - Drainage pipe profile (cross-section view)              │
+│                                                                  │
+│  ACCEPTANCE CRITERIA:                                            │
+│  ✓ Map loads within 3 seconds on 4G connection                   │
+│  ✓ Smooth interaction with 2,500+ hotspot markers                │
+│  ✓ Works on Chrome, Firefox, Edge (latest 2 versions)            │
+│  ✓ Responsive: usable on tablet (1024px+)                        │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│  MODULE 2: FLOOD HOTSPOT IDENTIFICATION ENGINE                   │
+│  Priority: P0 (Must Have)                                        │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  F2.1  Micro-basin delineation                                   │
+│        - Auto-generate 2,500+ micro-basins from DEM              │
+│        - Each basin: unique ID, area, pour point, avg slope,     │
+│          avg elevation, elevation range                          │
+│        - Visualize basin hierarchy (which drains into which)     │
+│                                                                  │
+│  F2.2  Flood Vulnerability Index (FVI) computation               │
+│        - Compute FVI for each micro-basin                        │
+│        - Components: historical frequency, elevation depression, │
+│          drainage deficit, imperviousness, TWI, upstream area    │
+│        - Configurable weights (admin can adjust)                 │
+│        - FVI re-computation on data updates                      │
+│                                                                  │
+│  F2.3  Hotspot classification and ranking                        │
+│        - Classify: Very High / High / Moderate / Low / Very Low  │
+│        - Global rank: 1 to N across city                         │
+│        - Ward-level rank: within each ward                       │
+│        - Filter / search / sort by any attribute                 │
+│                                                                  │
+│  F2.4  Scenario-based flood simulation                           │
+│        - Input: rainfall amount (mm) + duration (hours)          │
+│        - Output: which basins flood, predicted depth, volume     │
+│        - Pre-built scenarios: 2yr, 5yr, 10yr, 25yr, 50yr        │
+│          return period storms                                    │
+│        - Custom scenario: user enters any rainfall value         │
+│                                                                  │
+│  F2.5  Drainage deficit analysis                                 │
+│        - Per micro-basin: required capacity vs available capacity│
+│        - Deficit map: red zones = demand >> supply               │
+│        - "What-if": simulate adding new drain pipe → see         │
+│          impact on deficit                                       │
+│                                                                  │
+│  ACCEPTANCE CRITERIA:                                            │
+│  ✓ 2,500+ unique micro-basins generated                         │
+│  ✓ FVI computed for 100% of basins                              │
+│  ✓ Scenario simulation runs in < 30 seconds                     │
+│  ✓ Historical validation: >80% recall on past floods            │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│  MODULE 3: PRE-MONSOON READINESS SCORE (PMRS)                   │
+│  Priority: P0 (Must Have)                                        │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  F3.1  PMRS computation engine                                   │
+│        - Compute 4-component score per ward                      │
+│        - Infrastructure (30%) + Vulnerability (25%) +            │
+│          Response Prep (25%) + Historical Performance (20%)      │
+│        - Auto-pull data where available; manual entry forms      │
+│          for field-collected data                                │
+│                                                                  │
+│  F3.2  PMRS data collection forms                                │
+│        - Web forms for ward engineers to input:                  │
+│          ☐ Desilting progress (km completed / total km)          │
+│          ☐ Pump status (operational / under repair / defunct)    │
+│          ☐ Equipment inventory                                   │
+│          ☐ Team strength and training status                     │
+│        - Photo upload for verification                           │
+│        - Approval workflow (engineer → zonal officer)            │
+│                                                                  │
+│  F3.3  PMRS dashboard                                            │
+│        - City-wide summary: avg score, grade distribution        │
+│        - Ward ranking table (sortable by total & component)      │
+│        - Spider/radar chart per ward (4 components)              │
+│        - Trend chart: PMRS over time (month-on-month)            │
+│        - Comparison view: select 2-5 wards side-by-side          │
+│                                                                  │
+│  F3.4  Gap analysis & action items                               │
+│        - Auto-generate ward-specific action items from gaps      │
+│        - Priority ordering by impact on PMRS improvement         │
+│        - Assignment to responsible officer                       │
+│        - Due dates and progress tracking                         │
+│        - Notification/escalation on overdue items                │
+│                                                                  │
+│  F3.5  Pre-Monsoon Readiness Report (auto-generated)             │
+│        - PDF report per ward and city-wide                       │
+│        - Executive summary, scores, gaps, recommendations        │
+│        - Comparison with previous year                           │
+│        - Budget estimation for gap closure                       │
+│                                                                  │
+│  ACCEPTANCE CRITERIA:                                            │
+│  ✓ PMRS computed for 100% of wards                              │
+│  ✓ Score update reflects within 24 hours of data entry           │
+│  ✓ Report generation < 60 seconds                               │
+│  ✓ Action items auto-generated with 90%+ relevance              │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│  MODULE 4: RAINFALL ANALYSIS & FORECASTING                       │
+│  Priority: P0 (Must Have)                                        │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  F4.1  Historical rainfall analysis                              │
+│        - IDF curves for the city (auto-computed from data)       │
+│        - Return period analysis (2, 5, 10, 25, 50, 100 yr)      │
+│        - Monthly/seasonal rainfall statistics                    │
+│        - Trend analysis (is rainfall increasing over decades?)   │
+│        - Extreme event catalog                                   │
+│                                                                  │
+│  F4.2  Real-time rainfall ingestion                              │
+│        - Pull from AWS stations every 15 minutes                 │
+│        - Pull from IMD radar/satellite every 30 minutes          │
+│        - Spatial interpolation to micro-basin level              │
+│        - Running accumulation display (1hr, 3hr, 6hr, 24hr)     │
+│        - Comparison with IDF: "Current event = X-yr storm"       │
+│                                                                  │
+│  F4.3  Forecast integration                                      │
+│        - IMD district/city forecast (text + QPF)                 │
+│        - GFS/ECMWF model output (if accessible)                  │
+│        - Nowcasting: extrapolate radar for 0-3 hours             │
+│        - Confidence level displayed with each forecast           │
+│                                                                  │
+│  F4.4  Alert generation                                          │
+│        - Threshold-based alerts when rainfall exceeds            │
+│          design capacity of drainage                             │
+│        - Alert levels: GREEN → YELLOW → ORANGE → RED             │
+│        - Delivery: in-app, SMS, email, WhatsApp API              │
+│        - Customizable thresholds per ward (different areas       │
+│          have different capacities)                               │
+│                                                                  │
+│  ACCEPTANCE CRITERIA:                                            │
+│  ✓ Rainfall data refreshes every 15 minutes during events       │
+│  ✓ Alerts delivered within 5 minutes of threshold breach         │
+│  ✓ IDF curves validated against published literature             │
+│  ✓ Forecast lead time ≥ 3 hours                                 │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│  MODULE 5: PREDICTIVE ENGINE (ML-Enhanced)                       │
+│  Priority: P1 (Should Have)                                      │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  F5.1  Physics-ML hybrid flood prediction                        │
+│        - Real-time: given current + forecast rainfall,           │
+│          predict which hotspots will activate and depths         │
+│        - Update predictions every 15-30 minutes during event    │
+│        - Confidence intervals on all predictions                 │
+│        - Explainability: top 3 factors driving each prediction   │
+│                                                                  │
+│  F5.2  Model management                                          │
+│        - Model versioning and A/B testing                        │
+│        - Performance metrics dashboard (accuracy over time)      │
+│        - Automated retraining pipeline (post-monsoon)            │
+│        - Manual trigger for retraining with new data             │
+│                                                                  │
+│  F5.3  Temporal prediction                                       │
+│        - Timeline view: "Hotspot X activates at T+45min,         │
+│          peaks at T+90min, clears at T+180min"                  │
+│        - Animated flood progression map                          │
+│                                                                  │
+│  ACCEPTANCE CRITERIA:                                            │
+│  ✓ Prediction runs within 60 seconds for entire city             │
+│  ✓ RMSE < 20cm for flood depth predictions                      │
+│  ✓ Recall > 85% for hotspot activation                          │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│  MODULE 6: RESOURCE DEPLOYMENT MANAGER                           │
+│  Priority: P1 (Should Have)                                      │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  F6.1  Resource inventory management                             │
+│        - Track: portable pumps, dewatering machines, barriers,   │
+│          boats, generators, sandbags, response teams             │
+│        - Location tracking (which depot / which ward)            │
+│        - Status: available / deployed / under maintenance        │
+│                                                                  │
+│  F6.2  Optimized deployment suggestions                          │
+│        - Given forecast + hotspot predictions, suggest optimal   │
+│          resource allocation                                     │
+│        - Minimize total expected damage / response time          │
+│        - Respect constraints: travel time, capacity, shifts      │
+│                                                                  │
+│  F6.3  Deployment tracking                                       │
+│        - Real-time tracking of deployed resources (GPS)          │
+│        - Status updates from field (arrived, operational, done)  │
+│        - Time-stamped audit trail                                │
+│                                                                  │
+│  ACCEPTANCE CRITERIA:                                            │
+│  ✓ Deployment plan generated within 5 minutes of forecast       │
+│  ✓ 90%+ resource utilization during events                      │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│  MODULE 7: MOBILE APP (Field Operations)                         │
+│  Priority: P1 (Should Have)                                      │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  F7.1  Field team features                                       │
+│        - Assigned hotspots with navigation                       │
+│        - One-tap status updates (en route / arrived / pumping    │
+│          / cleared)                                              │
+│        - Photo/video capture with auto-geotagging                │
+│        - Water depth measurement input                           │
+│        - Offline mode with data sync when connected              │
+│                                                                  │
+│  F7.2  Citizen reporting (public-facing)                         │
+│        - Report waterlogging with photo + location               │
+│        - Auto-categorize severity from photo (future: CV)        │
+│        - Track complaint status                                  │
+│        - View nearby active hotspots / road closures             │
+│                                                                  │
+│  F7.3  Alerts & notifications                                    │
+│        - Push notifications for assigned deployments             │
+│        - Area-based flood alerts for citizens                    │
+│        - Offline alert caching                                   │
+│                                                                  │
+│  ACCEPTANCE CRITERIA:                                            │
+│  ✓ App works offline for core functions                          │
+│  ✓ Photo upload < 10 seconds on 3G                              │
+│  ✓ Battery usage < 5% per hour of active use                    │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│  MODULE 8: REPORTING & ANALYTICS                                 │
+│  Priority: P1 (Should Have)                                      │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  F8.1  Standard reports                                          │
+│        - Pre-Monsoon Readiness Report (annual)                   │
+│        - Post-Event Analysis Report (per event)                  │
+│        - Monthly Monsoon Summary                                 │
+│        - Annual Performance Review                               │
+│        - Ward Comparison Report                                  │
+│                                                                  │
+│  F8.2  Analytics dashboards                                      │
+│        - Trend analysis: floods over years                       │
+│        - Correlation: rainfall vs flood events                   │
+│        - Infrastructure ROI: investment vs flood reduction       │
+│        - Response time analytics                                 │
+│        - Prediction accuracy over time                           │
+│                                                                  │
+│  F8.3  Data export                                               │
+│        - Export any dataset as CSV, Shapefile, GeoJSON, KML      │
+│        - API access for integration with other city systems      │
+│        - Scheduled report delivery (email)                       │
+│                                                                  │
+│  ACCEPTANCE CRITERIA:                                            │
+│  ✓ Reports generated in < 60 seconds                            │
+│  ✓ All data exportable in at least 2 formats                    │
+│  ✓ API response time < 2 seconds for standard queries           │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│  MODULE 9: ADMINISTRATION & CONFIGURATION                        │
+│  Priority: P0 (Must Have)                                        │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  F9.1  User management                                           │
+│        - Roles: Super Admin, City Admin, Zonal Officer,          │
+│          Ward Engineer, Field Staff, Viewer, Public              │
+│        - Permission matrix per module and per ward               │
+│        - SSO integration (if city has identity system)           │
+│        - Audit logging of all user actions                       │
+│                                                                  │
+│  F9.2  Configuration management                                  │
+│        - Alert thresholds (customizable per ward)                │
+│        - PMRS weights (adjustable)                               │
+│        - FVI weights (adjustable)                                │
+│        - Notification channels and recipients                    │
+│        - Map styling and layer defaults                          │
+│                                                                  │
+│  F9.3  Data management                                           │
+│        - Upload interface for new GIS data layers                │
+│        - Data quality dashboard                                  │
+│        - Backup and restore                                      │
+│        - Data versioning (track changes to spatial data)         │
+│                                                                  │
+│  ACCEPTANCE CRITERIA:                                            │
+│  ✓ Role-based access enforced on all endpoints                  │
+│  ✓ Configuration changes reflected without app restart           │
+│  ✓ Full audit trail searchable for 2+ years                     │
+└──────────────────────────────────────────────────────────────────┘
+4.2 Feature Priority Matrix
+text
+
+┌──────────────────────────────────────────────────────────────────┐
+│                    MoSCoW PRIORITIZATION                         │
+├──────────┬──────────────────────────────────┬────────────────────┤
+│ PRIORITY │ FEATURES                         │ PHASE              │
+├──────────┼──────────────────────────────────┼────────────────────┤
+│          │ GIS Map with layer management     │                    │
+│          │ Micro-basin delineation           │                    │
+│  MUST    │ FVI computation & hotspot map     │  Phase 1           │
+│  HAVE    │ PMRS scoring & dashboard         │  (MVP)             │
+│  (P0)    │ Basic drainage capacity analysis  │  Months 1-4        │
+│          │ Historical rainfall analysis      │                    │
+│          │ User management & auth            │                    │
+│          │ Static scenario simulation        │                    │
+├──────────┼──────────────────────────────────┼────────────────────┤
+│          │ Real-time rainfall ingestion      │                    │
+│          │ ML prediction engine              │                    │
+│  SHOULD  │ Alert system (SMS/email/push)     │  Phase 2           │
+│  HAVE    │ Resource deployment optimizer     │  Months 4-8        │
+│  (P1)    │ Mobile app (field teams)          │                    │
+│          │ Post-event analysis reports       │                    │
+│          │ Temporal flood progression         │                    │
+├──────────┼──────────────────────────────────┼────────────────────┤
+│          │ 3D terrain visualization          │                    │
+│  COULD   │ Citizen reporting module          │  Phase 3           │
+│  HAVE    │ Social media NLP integration      │  Months 8-12       │
+│  (P2)    │ What-if infrastructure simulator  │                    │
+│          │ Economic impact estimator         │                    │
+│          │ Climate change projections        │                    │
+├──────────┼──────────────────────────────────┼────────────────────┤
+│  WON'T   │ IoT sensor integration           │                    │
+│  HAVE    │ Digital twin drainage simulation  │  Future            │
+│  (now)   │ Automated drone survey pipeline   │  Releases          │
+│  (P3)    │ Multi-city federation             │                    │
+│          │ AR field visualization            │                    │
+└──────────┴──────────────────────────────────┴────────────────────┘
+5. NON-FUNCTIONAL REQUIREMENTS
+text
+
+┌──────────────────────────────────────────────────────────────────┐
+│                NON-FUNCTIONAL REQUIREMENTS                       │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  PERFORMANCE                                                     │
+│  ├── Map initial load: < 3 seconds (fiber) / < 6 seconds (4G)  │
+│  ├── Map interaction (pan/zoom): < 200ms response               │
+│  ├── Hotspot layer render (2,500+ points): < 1 second           │
+│  ├── PMRS computation (all wards): < 30 seconds                 │
+│  ├── Scenario simulation: < 30 seconds                          │
+│  ├── API response (standard queries): < 2 seconds               │
+│  ├── Report generation: < 60 seconds                            │
+│  └── ML prediction (full city): < 60 seconds                    │
+│                                                                  │
+│  SCALABILITY                                                     │
+│  ├── Support city area up to 1,500 km²                          │
+│  ├── Up to 10,000 micro-basins                                  │
+│  ├── Up to 500 concurrent dashboard users                       │
+│  ├── Up to 10,000 mobile app users                              │
+│  ├── 10 years of historical data storage                        │
+│  └── Real-time data ingestion from 200+ sensors                 │
+│                                                                  │
+│  AVAILABILITY                                                    │
+│  ├── Overall uptime: 99.5%                                      │
+│  ├── During monsoon (Jun-Sep): 99.9% (critical period)          │
+│  ├── Planned maintenance: only during dry season                │
+│  ├── RTO (Recovery Time): < 1 hour                              │
+│  └── RPO (Recovery Point): < 15 minutes                         │
+│                                                                  │
+│  SECURITY                                                        │
+│  ├── HTTPS everywhere (TLS 1.3)                                 │
+│  ├── JWT-based authentication                                   │
+│  ├── Role-based access control (RBAC)                           │
+│  ├── API rate limiting                                          │
+│  ├── SQL injection prevention (parameterized queries)           │
+│  ├── Data encryption at rest (AES-256)                          │
+│  ├── Audit logging of all data modifications                    │
+│  ├── VAPT (Vulnerability Assessment) annually                   │
+│  └── Compliance with IT Act 2000 / data localization            │
+│                                                                  │
+│  USABILITY                                                       │
+│  ├── Mobile-responsive (tablet minimum for web; phone for app)  │
+│  ├── Multi-language: English + local language (Hindi/regional)   │
+│  ├── Accessibility: WCAG 2.1 AA compliance                     │
+│  ├── Color-blind safe color palettes for maps                   │
+│  ├── Maximum 3 clicks to reach any key information              │
+│  ├── Contextual help tooltips on all technical terms             │
+│  └── Onboarding tutorial for first-time users                   │
+│                                                                  │
+│  INTEGRATION                                                     │
+│  ├── RESTful API with OpenAPI 3.0 specification                 │
+│  ├── GeoJSON / WMS / WFS standard GIS interfaces                │
+│  ├── Webhook support for external alert systems                 │
+│  ├── SMS gateway integration (Twilio / govt SMS gateway)        │
+│  ├── WhatsApp Business API (optional)                           │
+│  └── Email (SMTP)                                               │
+│                                                                  │
+│  DATA RETENTION                                                  │
+│  ├── Real-time sensor data: 2 years at full resolution,         │
+│  │   then aggregated to hourly for archival                     │
+│  ├── Predictions & alerts: indefinite (for accuracy tracking)   │
+│  ├── User actions & audit logs: 5 years                        │
+│  ├── GIS layers: versioned, all versions retained               │
+│  └── Reports: indefinite                                        │
+│                                                                  │
+│  DEPLOYMENT                                                      │
+│  ├── Containerized (Docker)                                     │
+│  ├── Infrastructure as Code (Terraform)                         │
+│  ├── CI/CD pipeline with automated testing                      │
+│  ├── Blue-green deployment (zero downtime)                      │
+│  ├── Environment: Dev → Staging → Production                    │
+│  └── Cloud-agnostic (deployable on AWS / Azure / GovCloud)      │
+└──────────────────────────────────────────────────────────────────┘
+6. INFORMATION ARCHITECTURE & WIREFRAMES
+6.1 Navigation Structure
+text
+
+UFHE Web Application
+│
+├── 🏠 Dashboard (Landing Page)
+│   ├── City Overview Panel
+│   ├── Key Metrics Summary
+│   ├── Active Alerts Feed
+│   └── Quick Actions
+│
+├── 🗺️ Map Explorer
+│   ├── Layer Panel (left sidebar)
+│   ├── Map Canvas (center)
+│   ├── Feature Info Panel (right sidebar, on click)
+│   ├── Tools Bar (top: measure, draw, search, print)
+│   └── Legend (bottom-left)
+│
+├── 🎯 Flood Hotspots
+│   ├── Hotspot List View (table with filters)
+│   ├── Hotspot Detail View (per hotspot deep-dive)
+│   ├── Hotspot Map View (focused hotspot layer)
+│   └── Scenario Simulator
+│
+├── 📊 Readiness (PMRS)
+│   ├── City Scorecard
+│   ├── Ward Rankings
+│   ├── Ward Detail View (per ward)
+│   ├── Data Entry Forms
+│   ├── Action Items Tracker
+│   └── Report Generator
+│
+├── 🌧️ Rainfall
+│   ├── Current Conditions
+│   ├── Forecast View
+│   ├── Historical Analysis
+│   ├── IDF Curves
+│   └── Station Management
+│
+├── 🚨 Alerts & Operations (Monsoon Mode)
+│   ├── Active Alerts Dashboard
+│   ├── Deployment Plan
+│   ├── Field Team Tracker
+│   ├── Citizen Reports Feed
+│   └── Event Timeline
+│
+├── 📈 Analytics & Reports
+│   ├── Trend Analysis
+│   ├── Performance Metrics
+│   ├── Report Library
+│   └── Data Export
+│
+├── ⚙️ Administration
+│   ├── User Management
+│   ├── Configuration
+│   ├── Data Management
+│   ├── System Health
+│   └── Audit Logs
+│
+└── ❓ Help & Documentation
+    ├── User Guide
+    ├── Video Tutorials
+    ├── Glossary
+    └── Contact Support
+6.2 Key Screen Wireframes
+text
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  SCREEN: MAIN DASHBOARD                                                  │
+├──────────────────────────────────────────────────────────────────────────┤
+│ ┌────────┐                                                               │
+│ │ UFHE   │  Dashboard  Map  Hotspots  Readiness  Rainfall  Alerts  ⚙️  │
+│ └────────┘───────────────────────────────────────────────────────────────│
+│                                                                          │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐   │
+│  │ 🎯 HOTSPOTS  │ │ 📊 AVG PMRS  │ │ 🌧️ RAINFALL │ │ 🚨 ALERTS   │   │
+│  │              │ │              │ │              │ │              │   │
+│  │   2,847      │ │    62/100    │ │  12mm/hr     │ │   3 Active   │   │
+│  │   ▲ 23 new   │ │  Grade: B   │ │  (ongoing)   │ │   🟡🟠🔴     │   │
+│  │   this season│ │  ▲ +8 vs LY │ │  24hr: 45mm  │ │              │   │
+│  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘   │
+│                                                                          │
+│  ┌─────────────────────────────────┐ ┌──────────────────────────────┐   │
+│  │                                 │ │  WARD READINESS RANKING      │   │
+│  │     CITY MAP (Mini)             │ │  ──────────────────────────  │   │
+│  │                                 │ │  1. Ward 23  ██████████ 89  │   │
+│  │   ┌─────────────────────┐       │ │  2. Ward 07  █████████░ 82  │   │
+│  │   │    Choropleth by    │       │ │  3. Ward 45  ████████░░ 76  │   │
+│  │   │    PMRS Score       │       │ │  ...                        │   │
+│  │   │  🟢🟢🟡🟠🟡🟢      │       │ │  48. Ward 12 ████░░░░░░ 38  │   │
+│  │   │  🟡🟠🔴🟠🟡🟢      │       │ │  49. Ward 31 ███░░░░░░░ 29  │   │
+│  │   │  🟢🟡🟡🟢🟢🟡      │       │ │  50. Ward 08 ██░░░░░░░░ 22  │   │
+│  │   └─────────────────────┘       │ │                              │   │
+│  │  [Open Full Map →]              │ │  [View All Wards →]          │   │
+│  └─────────────────────────────────┘ └──────────────────────────────┘   │
+│                                                                          │
+│  ┌─────────────────────────────────┐ ┌──────────────────────────────┐   │
+│  │  RECENT ALERTS                  │ │  UPCOMING ACTIONS            │   │
+│  │  ────────────────               │ │  ─────────────────           │   │
+│  │  🔴 10:15 Red Alert Ward 12    │ │  ⬜ Desilting Ward 08 Due:3d │   │
+│  │     85mm/hr, 12 hotspots       │ │  ⬜ Pump repair W31  Due:5d  │   │
+│  │  🟠 09:30 Orange Alert Ward 31 │ │  ☑ Barrier test W12  Done   │   │
+│  │     60mm/hr, 5 hotspots        │ │  ⬜ Team drill W45   Due:7d  │   │
+│  │  🟡 08:45 Yellow Alert Ward 45 │ │                              │   │
+│  │     35mm/hr, 2 hotspots        │ │  [View All Actions →]        │   │
+│  └─────────────────────────────────┘ └──────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  SCREEN: MAP EXPLORER                                                    │
+├──────────────────────────────────────────────────────────────────────────┤
+│ ┌────────┐                                                               │
+│ │ UFHE   │  Dashboard  [Map]  Hotspots  Readiness  Rainfall  Alerts  ⚙️│
+│ └────────┘───────────────────────────────────────────────────────────────│
+│                                                                          │
+│ ┌─────────────┐┌────────────────────────────────────┐┌─────────────────┐│
+│ │ LAYERS      ││              📍 Search location... ││ FEATURE INFO    ││
+│ │             ││ ┌──┬──┬──┬──┬──┐                   ││                 ││
+│ │ ☑ Wards     ││ │🔍│📏│✏️│🖨️│📍│ ← Tools          ││ Selected:       ││
+│ │ ☑ Hotspots  ││ └──┴──┴──┴──┴──┘                   ││ Micro-Basin     ││
+│ │ ☐ Micro-    ││                                     ││ #MB-1247        ││
+│ │   basins    ││  ┌──────────────────────────────┐   ││                 ││
+│ │ ☑ Drainage  ││  │                              │   ││ Area: 0.12 km² ││
+│ │ ☐ DEM       ││  │                              │   ││ Avg Elev: 42m  ││
+│ │ ☐ Land Use  ││  │      INTERACTIVE MAP         │   ││ Slope: 1.2°    ││
+│ │ ☐ Buildings ││  │                              │   ││ CN: 87         ││
+│ │ ☐ Water     ││  │    (Mapbox GL / Deck.gl)     │   ││ FVI: 0.73 HIGH ││
+│ │   Bodies    ││  │                              │   ││ Drain Cap:     ││
+│ │ ☐ Flood     ││  │      🔴 🔴                    │   ││   0.8 m³/s     ││
+│ │   History   ││  │   🟠    🔴  🟡                │   ││ Peak Runoff:   ││
+│ │             ││  │  🟡  🟠   🟡                  │   ││   1.4 m³/s     ││
+│ │ ─────────── ││  │     🟢  🟡    🟠              │   ││ DEFICIT: 43%   ││
+│ │ BASEMAP     ││  │  🟢    🟢  🟡                 │   ││                 ││
+│ │ ○ Street    ││  │                              │   ││ Hist. Floods:  ││
+│ │ ● Satellite ││  │                              │   ││  8 events      ││
+│ │ ○ Terrain   ││  └──────────────────────────────┘   ││  (last 5 yrs)  ││
+│ │             ││                                     ││                 ││
+│ │ OPACITY ────││  ┌──────────────────────────────┐   ││ [Run Scenario] ││
+│ │ █████░░ 70% ││  │ LEGEND                       │   ││ [View History] ││
+│ │             ││  │ 🔴 Very High (FVI >0.8)      │   ││ [Export Data]  ││
+│ └─────────────┘│  │ 🟠 High (0.6-0.8)           │   │└─────────────────┘│
+│                │  │ 🟡 Moderate (0.4-0.6)        │   │                  │
+│                │  │ 🟢 Low (0.2-0.4)             │   │                  │
+│                │  │ ⚪ Very Low (<0.2)            │   │                  │
+│                │  └──────────────────────────────┘   │                  │
+└────────────────┴─────────────────────────────────────┴──────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  SCREEN: WARD READINESS DETAIL (PMRS)                                    │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ← Back to Rankings    WARD 12: Koramangala    PMRS: 42/100  Grade: C   │
+│  ═══════════════════════════════════════════════════════════════════════  │
+│                                                                          │
+│  ┌─────────────────────────┐  ┌────────────────────────────────────────┐│
+│  │                         │  │  COMPONENT BREAKDOWN                   ││
+│  │   SPIDER CHART          │  │  ──────────────────                    ││
+│  │                         │  │                                        ││
+│  │      Infrastructure     │  │  Infrastructure (30%)                  ││
+│  │          35/100         │  │  ███████░░░░░░░░░░░░░   35  🔴         ││
+│  │         ╱    ╲          │  │  ├─ Desilting:      20% complete       ││
+│  │  Historical  Vulnerability│  │  ├─ Pumps:          1/4 operational   ││
+│  │    30/100      55/100   │  │  ├─ Drain repairs:  3/8 done           ││
+│  │         ╲    ╱          │  │  └─ New infra:      None planned       ││
+│  │        Response         │  │                                        ││
+│  │         48/100          │  │  Vulnerability (25%)                   ││
+│  │                         │  │  ███████████░░░░░░░░░   55  🟠         ││
+│  │  ── This year           │  │  ├─ Hotspots covered: 8/15             ││
+│  │  -- Last year           │  │  ├─ Population exposed: 12,400         ││
+│  │                         │  │  ├─ Critical facilities: 2 unprotected ││
+│  └─────────────────────────┘  │  └─ Trend: Worsening (▼ 5 pts)        ││
+│                               │                                        ││
+│                               │  Response Preparedness (25%)           ││
+│                               │  ██████████░░░░░░░░░░   48  🟠         ││
+│                               │  ├─ Equipment: 60% positioned          ││
+│                               │  ├─ Teams: 3/5 trained                 ││
+│                               │  ├─ Comms drill: Not done              ││
+│                               │  └─ Evac routes: 2/3 cleared           ││
+│                               │                                        ││
+│                               │  Historical Performance (20%)          ││
+│                               │  ██████░░░░░░░░░░░░░░   30  🔴         ││
+│                               │  ├─ Last monsoon: 23 flood events      ││
+│                               │  ├─ Avg response: 5.2 hours            ││
+│                               │  ├─ Complaints resolved: 45%           ││
+│                               │  └─ Prediction accuracy: 62%           ││
+│                               └────────────────────────────────────────┘│
+│                                                                          │
+│  ┌──────────────────────────────────────────────────────────────────────┐│
+│  │  🎯 ACTION ITEMS TO IMPROVE PMRS (Auto-Generated, Priority Order)  ││
+│  ├──────┬───────────────────────────┬──────────┬────────┬──────────────┤│
+│  │ PRIO │ ACTION                    │ IMPACT   │ DUE    │ STATUS       ││
+│  ├──────┼───────────────────────────┼──────────┼────────┼──────────────┤│
+│  │  1   │ Complete desilting of     │ +12 pts  │ Jun 05 │ 🔴 Behind    ││
+│  │      │ Main Drain (3.2 km left)  │          │        │ schedule     ││
+│  │  2   │ Repair Pump #2 and #4 at  │ +8 pts   │ Jun 01 │ 🟡 In       ││
+│  │      │ Station B                 │          │        │ progress     ││
+│  │  3   │ Conduct communication     │ +5 pts   │ Jun 10 │ ⬜ Not       ││
+│  │      │ drill for flood response  │          │        │ started      ││
+│  │  4   │ Clear debris at Junction  │ +4 pts   │ Jun 03 │ ⬜ Not       ││
+│  │      │ X (critical hotspot)      │          │        │ started      ││
+│  │  5   │ Install flood barrier at  │ +3 pts   │ Jun 15 │ 🟡 Procuring ││
+│  │      │ underpass entry           │          │        │              ││
+│  └──────┴───────────────────────────┴──────────┴────────┴──────────────┘│
+│                                                                          │
+│  [📄 Generate Ward Report]  [📧 Email to Ward Engineer]  [🖨️ Print]     │
+└──────────────────────────────────────────────────────────────────────────┘
+7. API SPECIFICATION (Key Endpoints)
+text
+
+┌──────────────────────────────────────────────────────────────────────┐
+│                        API DESIGN (RESTful)                          │
+│                    Base URL: /api/v1                                  │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  SPATIAL DATA                                                        │
+│  ─────────────                                                       │
+│  GET    /wards                          List all wards               │
+│  GET    /wards/{ward_id}                Ward detail + geometry       │
+│  GET    /wards/{ward_id}/hotspots       Hotspots in a ward          │
+│  GET    /wards/{ward_id}/drainage       Drainage network in ward    │
+│  GET    /wards/{ward_id}/micro-basins   Micro-basins in ward        │
+│                                                                      │
+│  GET    /micro-basins                   All micro-basins (paginated)│
+│  GET    /micro-basins/{basin_id}        Basin detail + attributes   │
+│  GET    /micro-basins/{basin_id}/fvi    FVI breakdown               │
+│                                                                      │
+│  GET    /hotspots                        All hotspots (filterable)   │
+│  GET    /hotspots/{hotspot_id}           Hotspot detail              │
+│  GET    /hotspots/within                 Hotspots within polygon     │
+│         ?geometry=<GeoJSON>                (spatial query)           │
+│  GET    /hotspots/nearby                 Hotspots near point         │
+│         ?lat=X&lng=Y&radius=500m                                     │
+│                                                                      │
+│  PMRS                                                                │
+│  ────                                                                │
+│  GET    /pmrs/scores                     All ward PMRS scores       │
+│  GET    /pmrs/scores/{ward_id}           Ward PMRS detail           │
+│  GET    /pmrs/scores/{ward_id}/history   PMRS over time             │
+│  POST   /pmrs/data-entry                 Submit readiness data      │
+│  GET    /pmrs/action-items/{ward_id}     Action items for ward      │
+│  PATCH  /pmrs/action-items/{item_id}     Update action item status  │
+│  GET    /pmrs/report/{ward_id}           Generate ward report       │
+│  GET    /pmrs/report/city                Generate city report       │
+│                                                                      │
+│  RAINFALL                                                            │
+│  ────────                                                            │
+│  GET    /rainfall/current                Current readings (all stn) │
+│  GET    /rainfall/current/{ward_id}      Current for a ward         │
+│  GET    /rainfall/forecast               Latest forecast            │
+│  GET    /rainfall/historical             Historical data             │
+│         ?start=YYYY-MM-DD&end=YYYY-MM-DD                            │
+│  GET    /rainfall/idf                    IDF curve data             │
+│  GET    /rainfall/accumulation           Running accumulation       │
+│         ?duration=1hr|3hr|6hr|24hr                                   │
+│                                                                      │
+│  PREDICTIONS                                                         │
+│  ───────────                                                         │
+│  POST   /predict/scenario                Run flood scenario         │
+│         Body: {rainfall_mm, duration_hr, return_period}              │
+│  GET    /predict/realtime                Current predictions        │
+│  GET    /predict/realtime/{ward_id}      Predictions for ward       │
+│  GET    /predict/accuracy                Prediction accuracy stats  │
+│                                                                      │
+│  ALERTS                                                              │
+│  ──────                                                              │
+│  GET    /alerts/active                   Current active alerts      │
+│  GET    /alerts/history                  Past alerts                │
+│  POST   /alerts/acknowledge/{alert_id}   Acknowledge an alert       │
+│                                                                      │
+│  RESOURCES                                                           │
+│  ─────────                                                           │
+│  GET    /resources/inventory             All resources              │
+│  GET    /resources/deployed              Currently deployed         │
+│  POST   /resources/deploy                Deploy resource            │
+│  GET    /resources/deployment-plan       Suggested deployment       │
+│                                                                      │
+│  CITIZEN REPORTS                                                     │
+│  ───────────────                                                     │
+│  POST   /reports                         Submit flood report        │
+│         Body: {location, photo, description, severity}              │
+│  GET    /reports                         List reports (filterable)  │
+│  PATCH  /reports/{report_id}             Update report status       │
+│                                                                      │
+│  EXPORT                                                              │
+│  ──────                                                              │
+│  GET    /export/hotspots                 Export as CSV/SHP/GeoJSON  │
+│         ?format=csv|shapefile|geojson|kml                            │
+│  GET    /export/pmrs                     Export PMRS data           │
+│  GET    /export/rainfall                 Export rainfall data       │
+│                                                                      │
+│  RESPONSE FORMAT (Standard):                                         │
+│  {                                                                   │
+│    "status": "success",                                              │
+│    "data": { ... },                                                  │
+│    "meta": {                                                         │
+│      "total": 2847,                                                  │
+│      "page": 1,                                                      │
+│      "per_page": 50,                                                 │
+│      "timestamp": "2024-07-15T10:30:00Z"                            │
+│    }                                                                 │
+│  }                                                                   │
+│                                                                      │
+│  SPATIAL RESPONSE (GeoJSON):                                         │
+│  {                                                                   │
+│    "type": "FeatureCollection",                                      │
+│    "features": [                                                     │
+│      {                                                               │
+│        "type": "Feature",                                            │
+│        "geometry": { "type": "Point", "coordinates": [77.6, 12.9] },│
+│        "properties": {                                               │
+│          "hotspot_id": "HS-1247",                                    │
+│          "severity": "HIGH",                                         │
+│          "predicted_depth_cm": 65,                                   │
+│          "fvi_score": 0.73                                           │
+│        }                                                             │
+│      }                                                               │
+│    ]                                                                 │
+│  }                                                                   │
+└──────────────────────────────────────────────────────────────────────┘
+8. DATABASE SCHEMA (Key Tables)
+SQL
+
+-- ═══════════════════════════════════════════════════
+-- UFHE DATABASE SCHEMA (PostgreSQL + PostGIS)
+-- ═══════════════════════════════════════════════════
+
+-- ─────────────────────────────────────
+-- SPATIAL CORE TABLES
+-- ─────────────────────────────────────
+
+CREATE TABLE wards (
+    ward_id         SERIAL PRIMARY KEY,
+    ward_name       VARCHAR(100) NOT NULL,
+    ward_code       VARCHAR(20) UNIQUE NOT NULL,
+    zone_name       VARCHAR(100),
+    area_km2        NUMERIC(10,4),
+    population      INTEGER,
+    geometry        GEOMETRY(MultiPolygon, 4326) NOT NULL,
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_wards_geom ON wards USING GIST(geometry);
+
+CREATE TABLE micro_basins (
+    basin_id        SERIAL PRIMARY KEY,
+    basin_code      VARCHAR(20) UNIQUE NOT NULL,
+    ward_id         INTEGER REFERENCES wards(ward_id),
+    area_km2        NUMERIC(10,6),
+    mean_elevation  NUMERIC(8,2),    -- meters
+    min_elevation   NUMERIC(8,2),
+    max_elevation   NUMERIC(8,2),
+    mean_slope      NUMERIC(6,3),    -- degrees
+    pour_point      GEOMETRY(Point, 4326),
+    imperviousness  NUMERIC(5,2),    -- percentage
+    curve_number    NUMERIC(5,2),
+    twi             NUMERIC(8,3),    -- topographic wetness index
+    upstream_area   NUMERIC(10,4),   -- km²
+    fvi_score       NUMERIC(4,3),    -- 0.000 to 1.000
+    fvi_class       VARCHAR(20),     -- VERY_HIGH, HIGH, MODERATE, LOW, VERY_LOW
+    geometry        GEOMETRY(MultiPolygon, 4326) NOT NULL,
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_basins_geom ON micro_basins USING GIST(geometry);
+CREATE INDEX idx_basins_ward ON micro_basins(ward_id);
+CREATE INDEX idx_basins_fvi ON micro_basins(fvi_score DESC);
+
+CREATE TABLE drainage_network (
+    drain_id        SERIAL PRIMARY KEY,
+    drain_code      VARCHAR(30),
+    ward_id         INTEGER REFERENCES wards(ward_id),
+    drain_type      VARCHAR(30),     -- PRIMARY, SECONDARY, TERTIARY, NALA
+    material        VARCHAR(30),     -- CONCRETE, BRICK, RCC, EARTH
+    shape           VARCHAR(20),     -- CIRCULAR, RECTANGULAR, TRAPEZOIDAL
+    width_m         NUMERIC(6,3),
+    height_m        NUMERIC(6,3),
+    diameter_m      NUMERIC(6,3),    -- for circular pipes
+    length_m        NUMERIC(10,2),
+    slope           NUMERIC(8,6),    -- m/m
+    manning_n       NUMERIC(5,4),
+    capacity_m3s    NUMERIC(8,4),    -- computed full capacity
+    eff_capacity    NUMERIC(8,4),    -- effective after degradation
+    age_years       INTEGER,
+    condition       VARCHAR(20),     -- GOOD, FAIR, POOR, CRITICAL
+    last_desilt     DATE,
+    geometry        GEOMETRY(MultiLineString, 4326) NOT NULL,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_drain_geom ON drainage_network USING GIST(geometry);
+
+CREATE TABLE flood_hotspots (
+    hotspot_id      SERIAL PRIMARY KEY,
+    hotspot_code    VARCHAR(20) UNIQUE NOT NULL,
+    basin_id        INTEGER REFERENCES micro_basins(basin_id),
+    ward_id         INTEGER REFERENCES wards(ward_id),
+    location_name   VARCHAR(200),
+    fvi_score       NUMERIC(4,3),
+    severity_class  VARCHAR(20),
+    predicted_depth NUMERIC(6,2),     -- cm, for design storm
+    drain_deficit   NUMERIC(5,2),     -- percentage
+    pop_exposed     INTEGER,
+    critical_fac    INTEGER,          -- nearby critical facilities count
+    latitude        NUMERIC(10,7),
+    longitude       NUMERIC(10,7),
+    geometry        GEOMETRY(Point, 4326) NOT NULL,
+    rank_city       INTEGER,
+    rank_ward       INTEGER,
+    created_at      TIMESTAMPTZ DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_hotspot_geom ON flood_hotspots USING GIST(geometry);
+CREATE INDEX idx_hotspot_severity ON flood_hotspots(severity_class);
+
+-- ─────────────────────────────────────
+-- RAINFALL TABLES
+-- ─────────────────────────────────────
+
+CREATE TABLE rain_stations (
+    station_id      SERIAL PRIMARY KEY,
+    station_code    VARCHAR(20) UNIQUE,
+    station_name    VARCHAR(100),
+    station_type    VARCHAR(20),      -- AWS, MANUAL, RADAR
+    ward_id         INTEGER REFERENCES wards(ward_id),
+    latitude        NUMERIC(10,7),
+    longitude       NUMERIC(10,7),
+    elevation_m     NUMERIC(8,2),
+    status          VARCHAR(20),      -- ACTIVE, INACTIVE, MAINTENANCE
+    geometry        GEOMETRY(Point, 4326)
+);
+
+CREATE TABLE rainfall_observations (
+    obs_id          BIGSERIAL PRIMARY KEY,
+    station_id      INTEGER REFERENCES rain_stations(station_id),
+    timestamp       TIMESTAMPTZ NOT NULL,
+    rainfall_mm     NUMERIC(8,2),     -- cumulative for interval
+    interval_min    INTEGER,          -- 15, 30, 60 minutes
+    quality_flag    VARCHAR(10),      -- GOOD, SUSPECT, MISSING
+    source          VARCHAR(20)       -- AWS, MANUAL, SATELLITE
+);
+CREATE INDEX idx_rain_obs_time ON rainfall_observations(timestamp);
+CREATE INDEX idx_rain_obs_station ON rainfall_observations(station_id);
+-- Partitioning by month recommended for large datasets
+
+CREATE TABLE rainfall_basin (
+    id              BIGSERIAL PRIMARY KEY,
+    basin_id        INTEGER REFERENCES micro_basins(basin_id),
+    timestamp       TIMESTAMPTZ NOT NULL,
+    rainfall_mm     NUMERIC(8,2),     -- interpolated value
+    interp_method   VARCHAR(20),      -- KRIGING, IDW, THIESSEN
+    accumulation_1h NUMERIC(8,2),
+    accumulation_3h NUMERIC(8,2),
+    accumulation_6h NUMERIC(8,2),
+    accumulation_24h NUMERIC(8,2)
+);
+
+-- ─────────────────────────────────────
+-- PMRS TABLES
+-- ─────────────────────────────────────
+
+CREATE TABLE pmrs_scores (
+    score_id        SERIAL PRIMARY KEY,
+    ward_id         INTEGER REFERENCES wards(ward_id),
+    assessment_year INTEGER NOT NULL,
+    assessment_date DATE,
+    
+    -- Component scores (0-100)
+    infra_score     NUMERIC(5,2),
+    vuln_score      NUMERIC(5,2),
+    response_score  NUMERIC(5,2),
+    history_score   NUMERIC(5,2),
+    
+    -- Sub-component scores
+    desilting_pct   NUMERIC(5,2),
+    pumps_operational NUMERIC(5,2),
+    repairs_done    NUMERIC(5,2),
+    hotspot_coverage NUMERIC(5,2),
+    
+    -- Final score
+    total_score     NUMERIC(5,2),
+    grade           CHAR(1),          -- A, B, C, D, F
+    
+    computed_at     TIMESTAMPTZ DEFAULT NOW(),
+    
+    UNIQUE(ward_id, assessment_year)
+);
+
+CREATE TABLE pmrs_action_items (
+    item_id         SERIAL PRIMARY KEY,
+    ward_id         INTEGER REFERENCES wards(ward_id),
+    assessment_year INTEGER,
+    priority        INTEGER,
+    description     TEXT,
+    impact_points   NUMERIC(5,2),     -- estimated PMRS improvement
+    due_date        DATE,
+    assigned_to     INTEGER REFERENCES users(user_id),
+    status          VARCHAR(20),      -- NOT_STARTED, IN_PROGRESS, DONE, OVERDUE
+    completion_date DATE,
+    notes           TEXT,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─────────────────────────────────────
+-- PREDICTION & EVENTS TABLES
+-- ─────────────────────────────────────
+
+CREATE TABLE flood_predictions (
+    prediction_id   BIGSERIAL PRIMARY KEY,
+    basin_id        INTEGER REFERENCES micro_basins(basin_id),
+    hotspot_id      INTEGER REFERENCES flood_hotspots(hotspot_id),
+    prediction_time TIMESTAMPTZ,      -- when prediction was made
+    valid_time      TIMESTAMPTZ,      -- what time period it's for
+    rainfall_input  NUMERIC(8,2),     -- mm used as input
+    predicted_depth NUMERIC(6,2),     -- cm
+    predicted_volume NUMERIC(12,2),   -- m³
+    confidence      VARCHAR(10),      -- HIGH, MEDIUM, LOW
+    model_version   VARCHAR(20),
+    alert_level     VARCHAR(10),      -- GREEN, YELLOW, ORANGE, RED
+    actual_depth    NUMERIC(6,2),     -- filled in post-event (for validation)
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE flood_events (
+    event_id        SERIAL PRIMARY KEY,
+    event_date      DATE,
+    event_name      VARCHAR(100),     -- "July 15 2024 Heavy Rainfall"
+    total_rainfall  NUMERIC(8,2),     -- city average mm
+    peak_intensity  NUMERIC(8,2),     -- mm/hr
+    duration_hours  NUMERIC(6,2),
+    wards_affected  INTEGER,
+    hotspots_activated INTEGER,
+    total_complaints INTEGER,
+    notes           TEXT
+);
+
+CREATE TABLE flood_event_observations (
+    obs_id          BIGSERIAL PRIMARY KEY,
+    event_id        INTEGER REFERENCES flood_events(event_id),
+    hotspot_id      INTEGER REFERENCES flood_hotspots(hotspot_id),
+    basin_id        INTEGER REFERENCES micro_basins(basin_id),
+    observed_depth  NUMERIC(6,2),     -- cm
+    observation_time TIMESTAMPTZ,
+    duration_hours  NUMERIC(6,2),     -- how long waterlogging lasted
+    source          VARCHAR(30),      -- FIELD_SURVEY, CITIZEN_REPORT, SENSOR, SATELLITE
+    photo_url       TEXT,
+    verified        BOOLEAN DEFAULT FALSE
+);
+
+-- ─────────────────────────────────────
+-- USER & SYSTEM TABLES
+-- ─────────────────────────────────────
+
+CREATE TABLE users (
+    user_id         SERIAL PRIMARY KEY,
+    username        VARCHAR(50) UNIQUE NOT NULL,
+    email           VARCHAR(100) UNIQUE,
+    phone           VARCHAR(15),
+    full_name       VARCHAR(100),
+    role            VARCHAR(30),      -- SUPER_ADMIN, CITY_ADMIN, ZONAL_OFFICER, 
+                                      -- WARD_ENGINEER, FIELD_STAFF, VIEWER, PUBLIC
+    ward_id         INTEGER REFERENCES wards(ward_id),  -- NULL for city-level
+    zone            VARCHAR(50),
+    is_active       BOOLEAN DEFAULT TRUE,
+    password_hash   VARCHAR(255),
+    last_login      TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE audit_log (
+    log_id          BIGSERIAL PRIMARY KEY,
+    user_id         INTEGER REFERENCES users(user_id),
+    action          VARCHAR(50),      -- CREATE, UPDATE, DELETE, LOGIN, EXPORT
+    entity_type     VARCHAR(50),      -- WARD, HOTSPOT, PMRS, PREDICTION
+    entity_id       INTEGER,
+    details         JSONB,
+    ip_address      INET,
+    timestamp       TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE citizen_reports (
+    report_id       SERIAL PRIMARY KEY,
+    reporter_phone  VARCHAR(15),
+    reporter_name   VARCHAR(100),
+    location        GEOMETRY(Point, 4326),
+    ward_id         INTEGER REFERENCES wards(ward_id),
+    nearest_hotspot INTEGER REFERENCES flood_hotspots(hotspot_id),
+    description     TEXT,
+    severity_reported VARCHAR(20),
+    photo_urls      TEXT[],
+    status          VARCHAR(20),      -- SUBMITTED, VERIFIED, ASSIGNED, RESOLVED
+    assigned_to     INTEGER REFERENCES users(user_id),
+    resolution_time INTERVAL,
+    submitted_at    TIMESTAMPTZ DEFAULT NOW(),
+    resolved_at     TIMESTAMPTZ
+);
+9. RELEASE PLAN
+text
+
+┌──────────────────────────────────────────────────────────────────┐
+│                        RELEASE PLAN                              │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  RELEASE 1.0 — "FOUNDATION" (Month 4)                           │
+│  ────────────────────────────────────                            │
+│  ✓ GIS map with ward boundaries, drainage, DEM                  │
+│  ✓ Micro-basin delineation (2,500+)                             │
+│  ✓ FVI computation and hotspot identification                   │
+│  ✓ Static scenario simulation (design storms)                   │
+│  ✓ Basic user auth and roles                                    │
+│  ✓ Data export (CSV, GeoJSON)                                   │
+│  TARGET USERS: GIS team, hydrology consultants                  │
+│                                                                  │
+│  RELEASE 2.0 — "READINESS" (Month 7)                            │
+│  ────────────────────────────────────                            │
+│  ✓ PMRS scoring engine                                          │
+│  ✓ Data entry forms for ward engineers                          │
+│  ✓ PMRS dashboard with rankings & spider charts                 │
+│  ✓ Action item generation and tracking                          │
+│  ✓ Report generation (PDF)                                      │
+│  ✓ Historical rainfall analysis & IDF curves                    │
+│  TARGET USERS: Ward engineers, zonal officers, commissioner     │
+│                                                                  │
+│  RELEASE 3.0 — "PREDICTION" (Month 10)                          │
+│  ─────────────────────────────────────                           │
+│  ✓ Real-time rainfall ingestion                                 │
+│  ✓ ML-enhanced flood predictions                                │
+│  ✓ Alert system (in-app, SMS, email)                            │
+│  ✓ Resource deployment suggestions                              │
+│  ✓ Temporal flood progression view                              │
+│  TARGET USERS: All internal users, control room                 │
+│                                                                  │
+│  RELEASE 4.0 — "OPERATIONS" (Month 13)                          │
+│  ──────────────────────────────────────                          │
+│  ✓ Mobile app for field teams                                   │
+│  ✓ Citizen reporting module                                     │
+│  ✓ Real-time deployment tracking                                │
+│  ✓ Post-event analysis tools                                    │
+│  ✓ What-if infrastructure simulator                             │
+│  TARGET USERS: Field teams, citizens, full organization         │
+│                                                                  │
+│  RELEASE 5.0+ — "INTELLIGENCE" (Month 16+)                     │
+│  ───────────────────────────────────────────                     │
+│  ✓ 3D visualization                                             │
+│  ✓ Social media NLP integration                                 │
+│  ✓ Climate change projections                                   │
+│  ✓ Economic impact assessment                                   │
+│  ✓ IoT sensor integration                                       │
+│  ✓ Multi-city support                                           │
+└──────────────────────────────────────────────────────────────────┘
+PART B: COMPLETE DATA SOURCE DIRECTORY
+Where to Find Every Piece of Data You Need
+1. DIGITAL ELEVATION MODEL (DEM) SOURCES
+text
+
+┌──────────────────────────────────────────────────────────────────────┐
+│  DEM / TERRAIN DATA                                                  │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ★ FREE GLOBAL SOURCES                                              │
+│  ═════════════════════                                               │
+│                                                                      │
+│  1. SRTM (Shuttle Radar Topography Mission)                         │
+│     Resolution: 30m (1 arc-second)                                   │
+│     Coverage: Global (60°N to 56°S)                                  │
+│     Download:                                                        │
+│     → https://earthexplorer.usgs.gov                                │
+│       (Register → Search → Dataset: SRTM 1 Arc-Second Global)      │
+│     → https://dwtkns.com/srtm30m/                                  │
+│       (Direct tile download, easier interface)                      │
+│     → https://opentopography.org                                    │
+│       (Bulk download with API)                                      │
+│     Format: GeoTIFF (.tif)                                          │
+│     QUALITY: OK for regional analysis, TOO COARSE for urban         │
+│     micro-basins. Use as fallback only.                             │
+│                                                                      │
+│  2. ALOS PALSAR DEM (JAXA - Japan)                                  │
+│     Resolution: 12.5m                                                │
+│     Coverage: Global                                                 │
+│     Download:                                                        │
+│     → https://search.asf.alaska.edu                                 │
+│       (Alaska Satellite Facility — free registration)               │
+│       Dataset: ALOS PALSAR → Radiometric Terrain Corrected          │
+│     → https://www.eorc.jaxa.jp/ALOS/en/dataset/aw3d30/aw3d30_e.htm │
+│       (ALOS World 3D — 30m, also free)                              │
+│     Format: GeoTIFF                                                  │
+│     QUALITY: GOOD balance of resolution and coverage.               │
+│     ★ RECOMMENDED AS PRIMARY FREE SOURCE                            │
+│                                                                      │
+│  3. FABDEM (Forest And Buildings removed Copernicus DEM)            │
+│     Resolution: 30m                                                  │
+│     Coverage: Global                                                 │
+│     Download:                                                        │
+│     → https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn│
+│     SPECIAL: Buildings and trees REMOVED = closer to true ground    │
+│     elevation. VERY USEFUL for urban flood modeling.                 │
+│     Format: GeoTIFF                                                  │
+│     QUALITY: ★★★★ Best free option for urban hydrology              │
+│                                                                      │
+│  4. Copernicus DEM (European Space Agency)                          │
+│     Resolution: 30m (GLO-30) and 90m (GLO-90)                      │
+│     Download:                                                        │
+│     → https://spacedata.copernicus.eu/collections/copernicus-       │
+│       digital-elevation-model                                       │
+│     → Via OpenTopography API                                        │
+│     Format: GeoTIFF                                                  │
+│     QUALITY: Very accurate, recent (2021)                           │
+│                                                                      │
+│  5. CartoDEM (ISRO — India specific) ★★★★★                         │
+│     Resolution: ~30m (derived from Cartosat stereo imagery)         │
+│     Coverage: India                                                  │
+│     Download:                                                        │
+│     → https://bhuvan.nrsc.gov.in                                    │
+│       (Register → Bhuvan → Download → CartoDEM)                    │
+│     → https://bhuvan-app1.nrsc.gov.in/thematic/thematic/index.php  │
+│     Format: GeoTIFF                                                  │
+│     QUALITY: BEST FREE SOURCE FOR INDIAN CITIES.                    │
+│     Specifically designed for India's terrain.                       │
+│                                                                      │
+│  ★ PAID / HIGH-RESOLUTION SOURCES                                   │
+│  ═════════════════════════════════                                   │
+│                                                                      │
+│  6. LiDAR Survey (Custom Commission)                                │
+│     Resolution: 0.5m - 2m                                           │
+│     How to get:                                                      │
+│     → Contact survey companies: Geokno, ScanPoint, Trimble India    │
+│     → Municipal corporation may already have (check with Survey     │
+│       of India or city planning department)                         │
+│     → Cost: ₹5-15 per hectare (airborne LiDAR)                    │
+│     → National LiDAR Mapping Program (NLMP) by Survey of India     │
+│       may have coverage — check with SOI                            │
+│     QUALITY: ★★★★★ GOLD STANDARD. Get this for top 50 hotspots.   │
+│                                                                      │
+│  7. Drone Photogrammetry (DIY High-Res DEM)                        │
+│     Resolution: 2cm - 50cm                                          │
+│     How to do:                                                       │
+│     → DJI Phantom/Mavic drone with survey-grade flight planning     │
+│     → Software: Pix4D, Agisoft Metashape, OpenDroneMap (free)      │
+│     → Fly critical flood-prone areas (underpasses, low-lying zones) │
+│     → Cost: ~₹2-5L for equipment + ₹5K per km² for processing     │
+│     → DGCA approval needed for urban drone flights in India        │
+│     QUALITY: ★★★★★ Best for specific critical locations            │
+│                                                                      │
+│  8. Maxar / Airbus WorldDEM                                         │
+│     Resolution: 5m                                                   │
+│     → https://www.maxar.com                                         │
+│     → https://www.intelligence-airbusds.com/worlddem/               │
+│     Cost: Commercial pricing (thousands of $)                       │
+│     QUALITY: Excellent but expensive                                │
+│                                                                      │
+│  ★ RECOMMENDED STRATEGY:                                            │
+│  ════════════════════════                                            │
+│  Layer 1: FABDEM or CartoDEM (30m) for entire city → FREE           │
+│  Layer 2: ALOS PALSAR (12.5m) for entire city → FREE                │
+│  Layer 3: LiDAR or Drone for top 100 critical hotspots → PAID      │
+│  Merge using weighted averaging in overlapping areas.               │
+└──────────────────────────────────────────────────────────────────────┘
+2. RAINFALL DATA SOURCES
+text
+
+┌──────────────────────────────────────────────────────────────────────┐
+│  RAINFALL DATA                                                       │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ★ INDIAN METEOROLOGICAL DEPARTMENT (IMD) — PRIMARY SOURCE          │
+│  ══════════════════════════════════════════════════════════          │
+│                                                                      │
+│  1. IMD Gridded Rainfall Data (Daily)                               │
+│     Resolution: 0.25° × 0.25° (~25km grid)                         │
+│     Period: 1901 to present                                          │
+│     Download:                                                        │
+│     → https://www.imdpune.gov.in/cmpg/Griddata/Rainfall_25_Bin.html│
+│     → Contact: cdsp@imdpune.gov.in                                 │
+│     → Data available in binary grid format                          │
+│     → Python library to read: `imdlib` (pip install imdlib)        │
+│     Format: Binary grid / NetCDF                                    │
+│     COST: Free for research, nominal fee for commercial             │
+│     USE: Long-term trend analysis, IDF curves, return periods       │
+│                                                                      │
+│  2. IMD Station-Level Data (Daily/Hourly)                           │
+│     → https://cdsp.imdpune.gov.in/                                 │
+│       (Climate Data Services Portal)                                │
+│     → Submit formal request for station data                        │
+│     → Specify: city name, station codes, date range                 │
+│     → Hourly data available for AWS stations (post-2000)            │
+│     → Processing time: 2-4 weeks                                    │
+│     COST: ₹500-5000 depending on volume                            │
+│     USE: IDF curves, hourly storm patterns                          │
+│                                                                      │
+│  3. IMD AWS (Automatic Weather Stations) — Real-time                │
+│     → http://aws.imd.gov.in                                        │
+│     → Some cities have 15-minute interval data                      │
+│     → API access: contact IMD's IT division                        │
+│     → Check if your city corporation has its own AWS network        │
+│     USE: Real-time monitoring, nowcasting input                     │
+│                                                                      │
+│  4. IMD Radar Data                                                   │
+│     → https://mausam.imd.gov.in/imd_latest/contents/radar.php      │
+│     → DWR (Doppler Weather Radar) images available                  │
+│     → Covers most major Indian cities                               │
+│     → API/bulk access: formal request to IMD                       │
+│     USE: Spatial rainfall estimation, nowcasting                    │
+│                                                                      │
+│  ★ SATELLITE-BASED RAINFALL ESTIMATES                               │
+│  ════════════════════════════════════                                │
+│                                                                      │
+│  5. NASA GPM IMERG (Global Precipitation Measurement)               │
+│     Resolution: 0.1° × 0.1° (~10km), 30-minute intervals           │
+│     Latency: Near-real-time (4 hours), Final (3 months)             │
+│     Download:                                                        │
+│     → https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGHH_06/summary  │
+│     → https://pmm.nasa.gov/data-access/downloads/gpm              │
+│     → API: https://disc.gsfc.nasa.gov/information/tools            │
+│     → Python: Use `requests` with Earthdata Login credentials      │
+│     Registration: https://urs.earthdata.nasa.gov/                   │
+│     Format: HDF5 / NetCDF4                                          │
+│     COST: FREE                                                      │
+│     USE: Gap-fill where ground stations don't exist,                │
+│          cross-validation with ground truth                         │
+│     ★ EXCELLENT for cities with sparse rain gauge network           │
+│                                                                      │
+│  6. CHIRPS (Climate Hazards Infrared Precipitation)                 │
+│     Resolution: 0.05° (~5km), Daily                                  │
+│     Period: 1981 to present                                          │
+│     Download:                                                        │
+│     → https://www.chc.ucsb.edu/data/chirps                         │
+│     → https://data.chc.ucsb.edu/products/CHIRPS-2.0/               │
+│     Format: GeoTIFF, NetCDF                                         │
+│     COST: FREE                                                      │
+│     USE: Long-term climatology, trend analysis                      │
+│                                                                      │
+│  7. ERA5 Reanalysis (ECMWF)                                        │
+│     Resolution: 0.25° (~25km), Hourly                                │
+│     Period: 1950 to present                                          │
+│     Download:                                                        │
+│     → https://cds.climate.copernicus.eu/cdsapp#!/dataset/           │
+│       reanalysis-era5-single-levels                                 │
+│     → Python API: `cdsapi` (pip install cdsapi)                    │
+│     Format: GRIB / NetCDF                                            │
+│     COST: FREE                                                      │
+│     USE: Filling gaps in ground observations, long-term analysis,   │
+│          also provides soil moisture, temperature, humidity         │
+│                                                                      │
+│  8. INSAT-3D/3DR (ISRO Satellite)                                   │
+│     → https://mosdac.gov.in                                        │
+│       (Meteorological & Oceanographic Satellite Data Archival Centre)│
+│     → Real-time and archived satellite imagery                      │
+│     → Derived rainfall products (IMSRA — merged satellite product)  │
+│     → Registration required (free)                                  │
+│     Format: HDF5, GeoTIFF                                           │
+│     COST: FREE                                                      │
+│     USE: Real-time cloud imagery, satellite-derived rainfall        │
+│                                                                      │
+│  ★ CITY-SPECIFIC SOURCES                                            │
+│  ════════════════════════                                            │
+│                                                                      │
+│  9. Municipal Corporation's Own Rain Gauges                         │
+│     → Contact: Storm Water Drainage Department                     │
+│     → Many cities (Mumbai, Chennai, Bengaluru, Hyderabad) have     │
+│       dense AWS networks installed post-2015                        │
+│     → Data may be on internal servers / Excel sheets               │
+│     → THIS IS YOUR MOST VALUABLE DATA SOURCE                       │
+│     → Mumbai: MCGM has 60+ rain gauges                             │
+│     → Chennai: GCC has 25+ AWS stations                            │
+│     → Bengaluru: BBMP + KSNDMC have 70+ stations                  │
+│                                                                      │
+│  10. State Disaster Management Authority                            │
+│      → Most states maintain rainfall monitoring networks            │
+│      → KSNDMC (Karnataka): https://www.ksndmc.org                  │
+│      → TSDPS (Telangana): https://tsdps.telangana.gov.in           │
+│      → EMSC (Maharashtra): real-time rainfall data                  │
+│      → TNSDMA (Tamil Nadu): https://tnsdma.tn.gov.in              │
+│                                                                      │
+│  11. Central Water Commission (CWC)                                 │
+│      → https://cwc.gov.in                                           │
+│      → River gauge data + rainfall at river stations                │
+│      → Flood forecasting data                                       │
+│      → India-WRIS: https://indiawris.gov.in/wris/                  │
+│      USE: River levels for cities with riverine flooding            │
+│                                                                      │
+│  12. Weatherunderground / Private Weather Networks                  │
+│      → https://www.wunderground.com/history                        │
+│      → Citizen-run weather stations (good for validation)           │
+│      → API available (limited free tier)                            │
+│                                                                      │
+│  13. Open-Meteo (Free Weather API)                                  │
+│      → https://open-meteo.com/                                     │
+│      → Free API for historical + forecast weather data              │
+│      → Python: `openmeteo_requests` library                        │
+│      → Hourly resolution, based on ERA5 + weather models           │
+│      → Excellent for prototyping before securing IMD data          │
+│      ★ BEST FREE API TO START PROTOTYPING IMMEDIATELY              │
+│                                                                      │
+│  ★ REAL-TIME FORECAST SOURCES                                       │
+│  ════════════════════════════                                        │
+│                                                                      │
+│  14. IMD Forecast (Official)                                        │
+│      → https://mausam.imd.gov.in                                   │
+│      → City-specific forecasts, heavy rain warnings                 │
+│      → QPF (Quantitative Precipitation Forecast)                   │
+│      → Color-coded warnings (Green/Yellow/Orange/Red)               │
+│                                                                      │
+│  15. GFS (Global Forecast System — NOAA/USA)                        │
+│      → https://nomads.ncep.noaa.gov                                │
+│      → Free, updated 4× daily                                      │
+│      → Resolution: 0.25°, out to 16 days                           │
+│      → Format: GRIB2                                                │
+│      → Good for 3-7 day outlooks                                   │
+│                                                                      │
+│  16. ECMWF (European Centre) — Best global model                   │
+│      → https://www.ecmwf.int/en/forecasts                          │
+│      → Free for research (registration needed)                     │
+│      → Resolution: 0.1° (HRES), ensemble available                 │
+│      → ★ Most accurate global NWP model                            │
+│                                                                      │
+│  ★ PYTHON CODE TO GET STARTED WITH RAINFALL DATA:                  │
+│                                                                      │
+│  # Using imdlib for IMD gridded data                                │
+│  pip install imdlib                                                  │
+│                                                                      │
+│  import imdlib as imd                                                │
+│  # Download rainfall data for a region                              │
+│  start_yr = 2010                                                     │
+│  end_yr = 2023                                                       │
+│  variable = 'rain'  # 'rain' for rainfall, 'tmax'/'tmin' for temp  │
+│  data = imd.get_data(variable, start_yr, end_yr, fn_format='yearwise')│
+│  ds = imd.open_data(variable, start_yr, end_yr, 'yearwise')        │
+│  # Get data for specific lat/lon                                    │
+│  ts = ds.get_timeseries([12.97, 77.59])  # Bengaluru coordinates   │
+│                                                                      │
+│  # Using Open-Meteo API for quick prototyping                       │
+│  import openmeteo_requests                                           │
+│  import requests_cache                                               │
+│  from retry_requests import retry                                    │
+│  cache_session = requests_cache.CachedSession('.cache', expire=3600)│
+│  om = openmeteo_requests.Client(session=retry(cache_session))       │
+│  params = {                                                          │
+│      "latitude": 12.97,                                              │
+│      "longitude": 77.59,                                             │
+│      "hourly": "precipitation",                                     │
+│      "start_date": "2020-01-01",                                    │
+│      "end_date": "2023-12-31"                                       │
+│  }                                                                   │
+│  responses = om.weather_api(                                         │
+│      "https://archive-api.open-meteo.com/v1/archive", params=params)│
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+3. DRAINAGE & INFRASTRUCTURE DATA
+text
+
+┌──────────────────────────────────────────────────────────────────────┐
+│  DRAINAGE NETWORK & INFRASTRUCTURE DATA                              │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  1. Municipal Corporation SWD Department                            │
+│     → Storm Water Drainage (SWD) Department GIS data                │
+│     → Often digitized under Smart Cities Mission or AMRUT           │
+│     → Ask for: drain line shapefile, pipe dimensions database,      │
+│       pump station locations, outfall points                        │
+│     → If not digitized: request paper maps and digitize manually    │
+│       using QGIS                                                    │
+│     → Contact: Executive Engineer, SWD Division                     │
+│                                                                      │
+│  2. Smart Cities Mission GIS Data                                   │
+│     → https://smartcities.gov.in                                    │
+│     → Many Smart City SPVs have GIS cells with digitized            │
+│       infrastructure                                                │
+│     → Command and Control Centers often have drainage data          │
+│     → Check with your city's Smart City SPV                        │
+│                                                                      │
+│  3. AMRUT Data (Atal Mission for Rejuvenation & Urban              │
+│     Transformation)                                                  │
+│     → https://amrut.gov.in                                          │
+│     → Cities under AMRUT have prepared Service Level                │
+│       Improvement Plans (SLIPs) with drainage data                  │
+│     → DPRs (Detailed Project Reports) contain pipe diameters,      │
+│       gradients, capacity calculations                              │
+│                                                                      │
+│  4. OpenStreetMap (OSM) — Free                                      │
+│     → https://www.openstreetmap.org                                 │
+│     → Tags: waterway=drain, waterway=canal, waterway=stream        │
+│     → Download via:                                                  │
+│       → https://overpass-turbo.eu (query specific area)             │
+│       → https://download.geofabrik.de/asia/india.html              │
+│         (Pre-built country/state extracts)                          │
+│     → Quality: Variable — good in well-mapped cities,              │
+│       may need supplementing                                        │
+│     → Python: `osmnx` library for easy download                    │
+│                                                                      │
+│     import osmnx as ox                                               │
+│     # Get waterways/drainage for a city                             │
+│     G = ox.graph_from_place("Bengaluru, India",                     │
+│         custom_filter='["waterway"~"drain|canal|stream"]')          │
+│                                                                      │
+│  5. Survey of India Toposheets                                      │
+│     → 1:25,000 and 1:50,000 scale                                  │
+│     → Show natural drainage lines, contours, water bodies           │
+│     → Available at SOI offices or online:                           │
+│       → https://onlinemaps.surveyofindia.gov.in/FreeOtherMaps.aspx │
+│     → Useful for natural drainage patterns                          │
+│                                                                      │
+│  6. City Master Plan / CDP Documents                                │
+│     → City Development Plans and Master Plans contain:              │
+│       drainage network maps, flood-prone zone identification,       │
+│       infrastructure capacity assessments                           │
+│     → Usually available as PDF on city corporation website          │
+│     → Georeferencing PDF maps in QGIS:                              │
+│       Open PDF → Add ground control points → Export as GeoTIFF     │
+│       → Digitize features manually                                  │
+└──────────────────────────────────────────────────────────────────────┘
+4. LAND USE & IMPERVIOUS SURFACE DATA
+text
+
+┌──────────────────────────────────────────────────────────────────────┐
+│  LAND USE / LAND COVER (LULC) & IMPERVIOUS SURFACE                  │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  1. ISRO Bhuvan LULC (India-specific) ★★★★★                        │
+│     → https://bhuvan.nrsc.gov.in                                    │
+│     → LULC maps at 1:50,000 scale for entire India                  │
+│     → Decadal LULC (2005-06, 2011-12, 2015-16)                    │
+│     → Download: Register → Thematic Data → LULC                    │
+│     Format: Shapefile / GeoTIFF                                     │
+│     COST: FREE                                                      │
+│                                                                      │
+│  2. ESA WorldCover (European Space Agency)                          │
+│     → https://esa-worldcover.org/en                                 │
+│     Resolution: 10m (Sentinel-2 derived)                             │
+│     → 11 land cover classes including "Built-up"                    │
+│     → Latest: 2021                                                  │
+│     → Download: direct GeoTIFF tiles                                │
+│     COST: FREE                                                      │
+│     ★ BEST FREE HIGH-RESOLUTION GLOBAL LULC                        │
+│                                                                      │
+│  3. Google Dynamic World                                            │
+│     → https://dynamicworld.app                                      │
+│     Resolution: 10m, near-real-time updates                          │
+│     → 9 land cover classes                                          │
+│     → Access via Google Earth Engine                                │
+│     → Python: `ee` library (Google Earth Engine API)                │
+│     COST: FREE                                                      │
+│                                                                      │
+│  4. Global Impervious Surface (For Runoff Calculation)              │
+│     → GAIA dataset: https://doi.org/10.1594/PANGAEA.897975         │
+│       (30m global impervious area, 1985-2018)                       │
+│     → Global Urban Footprint (DLR):                                 │
+│       https://www.dlr.de/eoc/en/desktopdefault.aspx/tabid-11725/   │
+│     → GHSL (Global Human Settlement Layer):                        │
+│       https://ghsl.jrc.ec.europa.eu/download.php                    │
+│       Built-up surface, population grids                            │
+│     COST: FREE                                                      │
+│                                                                      │
+│  5. NDVI for Green Cover (Derive from Satellite)                    │
+│     → Sentinel-2 imagery via Copernicus Open Access Hub             │
+│       https://scihub.copernicus.eu                                  │
+│     → Google Earth Engine (easiest)                                 │
+│     → Calculate NDVI = (NIR - Red) / (NIR + Red)                  │
+│     → High NDVI = vegetation = higher infiltration                  │
+│     → Low NDVI = built-up/impervious = more runoff                 │
+│     COST: FREE                                                      │
+│                                                                      │
+│  6. Building Footprints                                             │
+│     → Microsoft Building Footprints:                                │
+│       https://github.com/microsoft/GlobalMLBuildingFootprints       │
+│       (ML-extracted, covers India, FREE)                            │
+│     → Google Open Buildings:                                        │
+│       https://sites.research.google/open-buildings/                 │
+│       (670M+ buildings, covers India, FREE)                         │
+│     → OpenStreetMap buildings (via Overpass API)                    │
+│     USE: Building density, impervious area estimation               │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+5. SOIL & HYDROGEOLOGY DATA
+text
+
+┌──────────────────────────────────────────────────────────────────────┐
+│  SOIL & GROUNDWATER DATA                                             │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  1. NBSS&LUP Soil Maps (India)                                      │
+│     → National Bureau of Soil Survey & Land Use Planning             │
+│     → https://www.nbsslup.in                                       │
+│     → Soil type maps at district level                              │
+│     → Needed for: Hydrological Soil Group (A/B/C/D) for CN method  │
+│     → May need formal request; some data on Bhuvan                  │
+│                                                                      │
+│  2. FAO Harmonized World Soil Database                              │
+│     → https://www.fao.org/soils-portal/data-hub/                   │
+│     Resolution: ~1km                                                 │
+│     → Soil texture, drainage class, water holding capacity          │
+│     COST: FREE                                                      │
+│                                                                      │
+│  3. SoilGrids (ISRIC)                                               │
+│     → https://soilgrids.org                                         │
+│     Resolution: 250m                                                 │
+│     → Clay content, sand content, organic carbon                    │
+│     → Can derive Hydrological Soil Group from texture              │
+│     → API + bulk download available                                 │
+│     COST: FREE                                                      │
+│     ★ BEST FREE SOIL DATA FOR THIS PROJECT                          │
+│                                                                      │
+│  4. CGWB (Central Ground Water Board)                               │
+│     → http://cgwb.gov.in                                            │
+│     → Water table depth maps                                        │
+│     → Shallow water table = less infiltration capacity              │
+│     → District-level reports available as PDF                       │
+│     → India-WRIS also has groundwater data                          │
+│                                                                      │
+│  HYDROLOGICAL SOIL GROUP MAPPING:                                    │
+│  ┌──────────┬──────────────┬───────────────────────────────┐        │
+│  │ Group    │ Texture      │ Infiltration Rate             │        │
+│  ├──────────┼──────────────┼───────────────────────────────┤        │
+│  │ A (High) │ Sand, gravel │ > 7.6 mm/hr                  │        │
+│  │ B (Mod.) │ Sandy loam   │ 3.8 - 7.6 mm/hr              │        │
+│  │ C (Slow) │ Clay loam    │ 1.3 - 3.8 mm/hr              │        │
+│  │ D (V.Slow│ Clay, silty  │ < 1.3 mm/hr                  │        │
+│  │          │ clay         │                               │        │
+│  └──────────┴──────────────┴───────────────────────────────┘        │
+└──────────────────────────────────────────────────────────────────────┘
+6. HISTORICAL FLOOD DATA
+text
+
+┌──────────────────────────────────────────────────────────────────────┐
+│  HISTORICAL FLOOD RECORDS & VALIDATION DATA                          │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  1. Municipal Corporation Complaint Data                            │
+│     → Waterlogging/flooding complaints from citizen portals         │
+│     → Examples:                                                      │
+│       → Mumbai: https://portal.mcgm.gov.in                         │
+│       → Bengaluru: BBMP Sahaaya app / Janaagraha                   │
+│       → Chennai: GCC grievance portal                               │
+│       → Hyderabad: GHMC complaint system                            │
+│     → Get geotagged complaints with timestamps                      │
+│     → CRITICAL for training ML model                                │
+│                                                                      │
+│  2. NDMA / SDMA Flood Reports                                      │
+│     → https://ndma.gov.in                                           │
+│     → State Disaster Management Authority reports                   │
+│     → Post-event damage assessments                                 │
+│     → Flood affected area maps                                      │
+│                                                                      │
+│  3. Sentinel-1 SAR Flood Maps (Satellite)                           │
+│     → Copernicus EMS (Emergency Management Service):                │
+│       https://emergency.copernicus.eu/mapping/                      │
+│       → Activated flood maps for major events                       │
+│     → Sentinel-1 SAR imagery (sees through clouds!):               │
+│       https://scihub.copernicus.eu                                  │
+│     → Derive flood extent: water appears dark in SAR               │
+│     → Tools: SNAP (ESA), Google Earth Engine                       │
+│     COST: FREE                                                      │
+│     USE: Ground truth for validating model predictions              │
+│                                                                      │
+│  4. News Archive Mining                                             │
+│     → Search local newspaper archives for flood reports             │
+│     → Extract: date, location, approximate depth, duration          │
+│     → Sources: Times of India, Hindu, local language papers        │
+│     → Can use NLP to semi-automate extraction                      │
+│                                                                      │
+│  5. Social Media Mining                                             │
+│     → Twitter/X API: search for "flood" + city name                │
+│     → Geotagged photos and videos                                  │
+│     → Reddit city subreddits                                       │
+│     → Google Photos (shared publicly)                               │
+│     → YouTube (flood videos with location in description)           │
+│     → Tools: snscrape (Python), Tweepy                             │
+│                                                                      │
+│  6. Dartmouth Flood Observatory                                     │
+│     → https://floodobservatory.colorado.edu                         │
+│     → Global Active Archive of Large Flood Events                   │
+│     → Satellite-derived flood extent maps                           │
+│     COST: FREE                                                      │
+│                                                                      │
+│  7. EM-DAT International Disaster Database                          │
+│     → https://www.emdat.be                                          │
+│     → Major flood events cataloged globally                         │
+│     → Registration required                                        │
+│     COST: FREE                                                      │
+│                                                                      │
+│  8. India-WRIS Flood Atlas                                          │
+│     → https://indiawris.gov.in/wris/                                │
+│     → Flood-prone area maps, flood frequency maps                   │
+│     → River basin wise flood history                                │
+│     COST: FREE                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+7. WARD BOUNDARIES & ADMINISTRATIVE DATA
+text
+
+┌──────────────────────────────────────────────────────────────────────┐
+│  ADMINISTRATIVE BOUNDARIES & BASE DATA                               │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  1. Ward Boundaries                                                  │
+│     → Municipal Corporation website (check GIS/maps section)        │
+│     → State Election Commission (ward delimitation maps)            │
+│     → DataMeet India: https://github.com/datameet                   │
+│       (Community-maintained admin boundary shapefiles)              │
+│     → Bhuvan: Administrative boundaries download                    │
+│     → Survey of India: village/ward boundaries                      │
+│                                                                      │
+│  2. Census Data (Population per Ward)                               │
+│     → https://censusindia.gov.in                                    │
+│     → Ward-level population (2011 Census, projections for current)  │
+│     → Can also use WorldPop: https://www.worldpop.org               │
+│       (100m gridded population, updated annually, FREE)             │
+│                                                                      │
+│  3. Road Network                                                     │
+│     → OpenStreetMap (best free source)                              │
+│     → Download: https://download.geofabrik.de                       │
+│     → Python: `osmnx` library                                      │
+│                                                                      │
+│  4. Water Bodies                                                     │
+│     → OpenStreetMap (natural=water tag)                             │
+│     → Bhuvan water body layer                                      │
+│     → Global Surface Water (JRC):                                   │
+│       https://global-surface-water.appspot.com                      │
+│     → Shows water body extent changes over decades                  │
+│     → Identifies encroached water bodies (key flood cause!)         │
+│                                                                      │
+│  5. Critical Facilities (Hospitals, Schools, Substations)           │
+│     → OpenStreetMap POI data                                        │
+│     → Google Places API (paid, good coverage)                       │
+│     → City corporation records                                      │
+│     → National Health Mission facility lists                        │
+│     → State education department school lists                       │
+│                                                                      │
+│  6. Google Earth / Bing Maps Imagery                                │
+│     → Use as basemap in QGIS via XYZ Tiles:                        │
+│       Google: https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}  │
+│       Bing: https://ecn.t0.tiles.virtualearth.net/tiles/a{q}.jpeg  │
+│       ESRI: https://server.arcgisonline.com/ArcGIS/rest/services/  │
+│             World_Imagery/MapServer/tile/{z}/{y}/{x}                │
+│     → Manual digitization of features from satellite imagery        │
+│     → Change detection between years                                │
+└──────────────────────────────────────────────────────────────────────┘
+8. QUICK-START DATA ACQUISITION PLAN
+text
+
+┌──────────────────────────────────────────────────────────────────────┐
+│  "I WANT TO START BUILDING THIS WEEK" — MINIMUM DATA KIT            │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  DAY 1: Download these (all FREE, no approvals needed):             │
+│  ═══════════════════════════════════════════════════════             │
+│                                                                      │
+│  □ DEM:                                                              │
+│    → FABDEM from University of Bristol                               │
+│    → OR CartoDEM from Bhuvan                                        │
+│    → Download tiles covering your city                              │
+│                                                                      │
+│  □ City Boundary + Roads + Water Bodies + Buildings:                │
+│    → OpenStreetMap via Geofabrik or osmnx                           │
+│    pip install osmnx                                                 │
+│    import osmnx as ox                                                │
+│    city = ox.geocode_to_gdf("Bengaluru, India")                     │
+│    roads = ox.graph_from_place("Bengaluru", network_type='drive')   │
+│    buildings = ox.features_from_place("Bengaluru",                  │
+│                tags={'building': True})                               │
+│                                                                      │
+│  □ Land Use / Land Cover:                                           │
+│    → ESA WorldCover 10m tiles                                       │
+│    → Download from: https://esa-worldcover.org                      │
+│                                                                      │
+│  □ Building Footprints:                                             │
+│    → Google Open Buildings or Microsoft Building Footprints         │
+│                                                                      │
+│  □ Rainfall (for prototyping):                                      │
+│    → Open-Meteo API (no key needed!)                                │
+│    → OR: pip install imdlib → download IMD gridded data            │
+│                                                                      │
+│  □ Soil:                                                             │
+│    → SoilGrids 250m from https://soilgrids.org                     │
+│                                                                      │
+│  □ Population:                                                       │
+│    → WorldPop 100m grid from https://worldpop.org                   │
+│                                                                      │
+│  DAY 2-3: Process and load into PostGIS                             │
+│  ═══════════════════════════════════════                             │
+│                                                                      │
+│  □ Install: PostgreSQL + PostGIS                                    │
+│    → Docker: docker run -d -p 5432:5432 postgis/postgis             │
+│                                                                      │
+│  □ Load DEM and run watershed delineation:                          │
+│    pip install pysheds richdem whitebox                              │
+│                                                                      │
+│    from pysheds.grid import Grid                                     │
+│    grid = Grid.from_raster('dem.tif')                               │
+│    dem = grid.read_raster('dem.tif')                                │
+│    pit_filled = grid.fill_pits(dem)                                 │
+│    flooded = grid.fill_depressions(pit_filled)                      │
+│    inflated = grid.resolve_flats(flooded)                           │
+│    fdir = grid.flowdir(inflated)                                    │
+│    acc = grid.accumulation(fdir)                                    │
+│    # Extract streams and basins...                                  │
+│                                                                      │
+│  □ Load all vector data into PostGIS:                               │
+│    ogr2ogr -f "PostgreSQL" PG:"host=localhost dbname=ufhe           │
+│    user=postgres" ward_boundaries.shp -nln wards                    │
+│                                                                      │
+│  WEEK 1: Apply SCS-CN method to micro-basins                       │
+│  ═════════════════════════════════════════════                       │
+│                                                                      │
+│  □ Compute CN per basin from LULC + Soil                            │
+│  □ Compute drainage capacity from available network data            │
+│  □ Compute FVI for each basin                                       │
+│  □ Generate first hotspot map → VISUALIZE IN QGIS                  │
+│                                                                      │
+│  WEEK 2: Build basic dashboard                                      │
+│  ═════════════════════════════                                       │
+│                                                                      │
+│  □ FastAPI backend serving GeoJSON                                  │
+│  □ React + Mapbox GL frontend showing hotspot map                   │
+│  □ Basic ward PMRS skeleton                                         │
+│                                                                      │
+│  ★ YOU NOW HAVE A WORKING PROTOTYPE! ★                              │
+│                                                                      │
+│  WEEK 3-4: Request official data                                    │
+│  ═══════════════════════════════                                     │
+│                                                                      │
+│  □ Write formal letter to Municipal Corporation SWD Dept.           │
+│    requesting: drainage network GIS, pump station data,             │
+│    desilting records, complaint data                                │
+│  □ Request IMD station-level hourly data                            │
+│  □ Request ward boundary shapefile from corporation                 │
+│  □ Collect historical flood records from newspaper archives         │
+│                                                                      │
+│  These take 2-6 weeks to get responses. While waiting,              │
+│  you have enough free data to build 80% of the system.              │
+└──────────────────────────────────────────────────────────────────────┘
+9. DATA TOOLS & LIBRARIES CHEATSHEET
+text
+
+┌──────────────────────────────────────────────────────────────────────┐
+│  ESSENTIAL PYTHON LIBRARIES FOR THIS PROJECT                         │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  # SPATIAL / GIS                                                     │
+│  pip install geopandas          # Vector data handling              │
+│  pip install rasterio           # Raster data handling              │
+│  pip install shapely            # Geometric operations              │
+│  pip install fiona              # File I/O for spatial data         │
+│  pip install pyproj             # Coordinate transformations        │
+│  pip install folium             # Quick interactive maps            │
+│  pip install contextily         # Basemap tiles for matplotlib      │
+│                                                                      │
+│  # HYDROLOGY SPECIFIC                                                │
+│  pip install pysheds            # DEM-based watershed delineation   │
+│  pip install richdem            # Terrain analysis                  │
+│  pip install whitebox           # WhiteboxTools (comprehensive)     │
+│  pip install pyflwdir           # Flow direction algorithms         │
+│                                                                      │
+│  # RAINFALL / CLIMATE                                                │
+│  pip install imdlib             # IMD gridded data reader           │
+│  pip install netCDF4            # NetCDF file handling              │
+│  pip install xarray             # N-dimensional data arrays         │
+│  pip install cfgrib             # GRIB file handling                │
+│  pip install openmeteo-requests # Open-Meteo weather API            │
+│                                                                      │
+│  # DATA & ML                                                        │
+│  pip install pandas numpy scipy                                      │
+│  pip install scikit-learn                                            │
+│  pip install xgboost lightgbm                                       │
+│  pip install shap               # Model explainability              │
+│  pip install mlflow             # Experiment tracking               │
+│                                                                      │
+│  # DATABASE                                                          │
+│  pip install sqlalchemy         # ORM                               │
+│  pip install geoalchemy2       # PostGIS integration                │
+│  pip install psycopg2-binary   # PostgreSQL driver                  │
+│                                                                      │
+│  # API & WEB                                                         │
+│  pip install fastapi uvicorn    # Web API                           │
+│  pip install celery[redis]      # Async task queue                  │
+│                                                                      │
+│  # VISUALIZATION                                                     │
+│  pip install matplotlib                                              │
+│  pip install plotly             # Interactive charts                 │
+│  pip install pydeck             # Deck.gl Python bindings           │
+│  pip install keplergl           # Kepler.gl Jupyter integration     │
+│                                                                      │
+│  # OSM DATA                                                          │
+│  pip install osmnx              # OpenStreetMap data                │
+│  pip install overpy             # Overpass API                      │
+│                                                                      │
+│  # FULL INSTALL (one line):                                          │
+│  pip install geopandas rasterio shapely pysheds richdem whitebox    \│
+│    imdlib xarray netCDF4 osmnx scikit-learn xgboost shap fastapi   \│
+│    sqlalchemy geoalchemy2 psycopg2-binary folium plotly pydeck      │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
